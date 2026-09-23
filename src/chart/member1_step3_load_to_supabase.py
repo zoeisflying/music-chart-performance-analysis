@@ -66,6 +66,7 @@ def load_songs(csv_path=None):
     # Tìm file metadata bài hát
     if csv_path is None:
         candidates = [
+            "data/raw/chart/songs_enriched.csv", "data/raw/chart/unique_tracks.csv", "data/raw/chart/songs_master.csv",
             "docs/songs_enriched.csv", "docs/unique_tracks.csv", "docs/songs_master.csv",
             "songs_enriched.csv", "unique_tracks.csv", "songs_master.csv"
         ]
@@ -73,6 +74,7 @@ def load_songs(csv_path=None):
             if os.path.exists(candidate):
                 csv_path = candidate
                 break
+
 
 
     if not csv_path or not os.path.exists(csv_path):
@@ -117,10 +119,19 @@ def load_songs(csv_path=None):
 
 def load_chart_weekly(csv_pattern="chart_weekly*.csv"):
     import glob
-    matching_files = sorted(glob.glob(os.path.join("docs", csv_pattern)) if os.path.exists("docs") and glob.glob(os.path.join("docs", csv_pattern)) else glob.glob(csv_pattern))
+    search_dirs = [os.path.join("data", "raw", "chart"), "docs", ""]
+    matching_files = []
+    for d in search_dirs:
+        pat = os.path.join(d, csv_pattern) if d else csv_pattern
+        found = sorted(glob.glob(pat))
+        if found:
+            matching_files = found
+            break
+
     if not matching_files:
         print(f"[!] Không tìm thấy bất kỳ file nào khớp với '{csv_pattern}'!")
         return
+
 
 
     print("=" * 60)
