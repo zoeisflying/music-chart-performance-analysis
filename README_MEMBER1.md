@@ -21,8 +21,9 @@ pip install requests beautifulsoup4 supabase python-dotenv
 
 #### Bước 2: Chạy Step 1 (Đã chạy thành công ✅)
 ```powershell
-python member1_step1_kworb_totals.py
+python src/chart/member1_step1_kworb_totals.py
 ```
+- **Xử lý kỹ thuật**: Đã tích hợp bộ giải mã chuẩn `resp.encoding = "utf-8"` để khắc phục lỗi server Kworb trả về thiếu header charset, đảm bảo tên bài hát và nghệ sĩ tiếng Việt/tiếng Hàn chuẩn 100%.
 - **Kết quả**:
   - `songs_master.csv`: 17,972 dòng (4,344 bài VN, 9,798 bài US, 3,830 bài KR).
   - `unique_tracks.csv`: 15,036 bài duy nhất, đã sắp xếp theo độ phổ biến (`max_wks`).
@@ -30,29 +31,25 @@ python member1_step1_kworb_totals.py
 #### Bước 3: Chạy Step 2 (Crawl lịch sử tuần)
 - **Chế độ kiểm tra (Test 5 bài đầu tiên - Đã nghiệm thu ✅)**:
   ```powershell
-  python member1_step2_kworb_track_history.py
+  python src/chart/member1_step2_kworb_track_history.py
   ```
   -> Đã thu về 1,131 mốc tuần chính xác tuyệt đối.
 
 - **Chế độ chạy toàn bộ (Full Run với Checkpoint/Resume)**:
   ```powershell
-  python member1_step2_kworb_track_history.py --full
+  python src/chart/member1_step2_kworb_track_history.py --full
   ```
   > **💡 Tính năng quan trọng:**
   > - Script có cơ chế ghi nhận checkpoint vào `crawled_track_ids.txt`.
   > - Nếu rớt mạng hoặc bạn bấm `Ctrl+C` dừng lại, lần sau chạy lại script sẽ **tự động chạy tiếp các bài chưa crawl**, không bao giờ mất dữ liệu hay crawl trùng.
 
-#### Bước 4: Chuẩn hóa metadata qua Spotify API (Tùy chọn)
-Nếu có `SPOTIFY_CLIENT_ID` và `SPOTIFY_CLIENT_SECRET` (tạo free tại [developer.spotify.com](https://developer.spotify.com/dashboard)), tạo file `.env` tại `D:\`:
-```env
-SPOTIFY_CLIENT_ID=your_id_here
-SPOTIFY_CLIENT_SECRET=your_secret_here
-```
-Sau đó chạy:
+#### Bước 4: Chuẩn hóa metadata qua HTML công khai của Spotify (Không cần API / Premium)
+Do Spotify đã khóa Web API đối với tài khoản không có Spotify Premium, script `member1_step2b_htmlspotify_metadata.py` được thiết kế để bóc tách trực tiếp từ thẻ HTML công khai của Spotify (`open.spotify.com/track/<id>`):
 ```powershell
-python member1_step2b_spotify_metadata.py
+python src/chart/member1_step2b_htmlspotify_metadata.py
 ```
-*(Nếu chưa có API key, Step 3 vẫn nạp vào Supabase bình thường với trường album/release_date tạm để trống).*
+- Lấy trọn vẹn `release_date` từ thẻ `<meta name="music:release_date">` và `album` từ thẻ link album hoàn toàn miễn phí.
+
 
 #### Bước 5: Tạo bảng trên Supabase (Migration)
 Theo quy định nhóm, không tạo bảng thủ công trên Web UI:

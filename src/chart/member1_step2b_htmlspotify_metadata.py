@@ -1,11 +1,14 @@
 """
-MEMBER 1 - Step 2b: Bổ sung Metadata (Album, Release Date) qua HTML công khai của Spotify.
-KHÔNG CẦN SPOTIFY WEB API / KHÔNG CẦN SPOTIFY PREMIUM.
+MEMBER 1 - Step 2b: Bổ sung Metadata (Release Date, Album) qua Spotify Embed.
+KHÔNG CẦN SPOTIFY WEB API / KHÔNG CẦN TÀI KHOẢN SPOTIFY PREMIUM.
 
-Mục đích:
-  Cào trực tiếp từ trang HTML công khai https://open.spotify.com/track/<id>
-  để bóc tách ngày phát hành (release_date) và tên album (album)
-  cho các bài hát đã lấy mẫu (hoặc toàn bộ unique_tracks.csv).
+Cơ chế hoạt động:
+  Spotify cung cấp trang nhúng công khai: https://open.spotify.com/embed/track/<id>
+  Trang này nhúng sẵn dữ liệu JSON trong thẻ script id='__NEXT_DATA__',
+  chứa đầy đủ:
+    - Ngày phát hành chính thức (releaseDate -> isoString)
+    - Tên bài hát chuẩn Spotify (title / name)
+    - Nghệ sĩ chính thức (artists)
 
 Output:
   docs/songs_enriched.csv (hoặc songs_enriched.csv)
@@ -15,6 +18,7 @@ import os
 import sys
 import re
 import csv
+import json
 import time
 import random
 import requests
@@ -33,9 +37,9 @@ HEADERS = {
 
 def get_track_metadata_from_html(track_id: str, timeout=12):
     """
-    Bóc tách release_date và album từ trang web công khai của Spotify mà không cần API.
+    Trích xuất release_date và canonical metadata từ Spotify Embed mà không cần API.
     """
-    url = f"https://open.spotify.com/track/{track_id}"
+    url = f"https://open.spotify.com/embed/track/{track_id}"
     release_date = None
     album_name = None
 
@@ -43,27 +47,26 @@ def get_track_metadata_from_html(track_id: str, timeout=12):
         resp = requests.get(url, headers=HEADERS, timeout=timeout)
         if resp.status_code == 200:
             soup = BeautifulSoup(resp.text, "html.parser")
+            script = soup.find("script", id="__NEXT_DATA__")
+            if script and script.string:
+                data = json.loads(script.string)
+                entity = data.get("props", {}).get("pageProps", {}).get("state", {}).get("data", {}).get("entity", {})
 
-            # 1. Bóc tách release_date từ thẻ meta
-            meta_date = soup.find("meta", {"name": "music:release_date"})
-            if meta_date and meta_date.get("content"):
-                release_date = meta_date["content"].strip()
-            else:
-                # Dự phòng tìm trong meta description: "... Song · Artist · YYYY"
-                meta_desc = soup.find("meta", {"name": "description"})
-                if meta_desc and meta_desc.get("content"):
-                    parts = meta_desc["content"].split("·")
-                    if len(parts) >= 3:
-                        possible_year = parts[-1].strip()
-                        if re.match(r"^\d{4}$", possible_year):
-                            release_date = f"{possible_year}-01-01"
+                # 1. Bóc tách releaseDate
+                r_date = entity.get("releaseDate")
+                if isinstance(r_date, dict):
+                    iso = r_date.get("isoString", "")
+                    if len(iso) >= 10:
+                        release_date = iso[:10]
+                elif r_date:
+                    release_date = str(r_date)[:10]
 
-            # 2. Bóc tách tên Album từ thẻ link album
-            album_tag = soup.find("a", href=re.compile(r"^/album/"))
-            if album_tag:
-                span = album_tag.find("span")
-                if span and span.get_text(strip=True):
-                    album_name = span.get_text(strip=True)
+                # 2. Bóc tách album (nếu là album riêng, hoặc single)
+                album_obj = entity.get("album")
+                if isinstance(album_obj, dict):
+                    album_name = album_obj.get("name")
+                elif not album_name:
+                    album_name = entity.get("title") or entity.get("name")
 
     except Exception:
         pass
@@ -71,11 +74,10 @@ def get_track_metadata_from_html(track_id: str, timeout=12):
     return release_date, album_name
 
 
-def enrich_songs(input_csv=None, output_csv=None, limit=None, delay_range=(0.8, 1.5)):
+def enrich_songs(input_csv=None, output_csv=None, limit=None, delay_range=(0.6, 1.2)):
     """
-    Đọc danh sách bài hát và làm giàu metadata album + release_date.
+    Đọc danh sách bài hát và làm giàu metadata ngày phát hành + album.
     """
-    # Tự động tìm file đầu vào
     if input_csv is None:
         candidates = [
             "docs/unique_tracks.csv", "unique_tracks.csv",
@@ -90,15 +92,11 @@ def enrich_songs(input_csv=None, output_csv=None, limit=None, delay_range=(0.8, 
         print(f"[!] Không tìm thấy file đầu vào. Hãy chạy Step 1 trước!")
         return
 
-    # Tự động chọn file đầu ra
     if output_csv is None:
-        if os.path.exists("docs"):
-            output_csv = "docs/songs_enriched.csv"
-        else:
-            output_csv = "songs_enriched.csv"
+        output_csv = "docs/songs_enriched.csv" if os.path.exists("docs") else "songs_enriched.csv"
 
     print("=" * 60)
-    print("BẮT ĐẦU ENRICH METADATA QUA HTML SPOTIFY (KHÔNG CẦN API)")
+    print("BẮT ĐẦU ENRICH METADATA QUA SPOTIFY EMBED (KHÔNG CẦN API)")
     print(f"File đầu vào: {input_csv}")
     print(f"File đầu ra:  {output_csv}")
     print("=" * 60)
@@ -113,17 +111,13 @@ def enrich_songs(input_csv=None, output_csv=None, limit=None, delay_range=(0.8, 
 
     print(f"[*] Tổng số bài cần enrich: {len(songs):,} bài.")
 
-    # Đọc tiến độ đã có nếu file output tồn tại
     seen_ids = set()
-    rows_out = []
     if os.path.exists(output_csv):
         with open(output_csv, encoding="utf-8-sig") as f:
             for r in csv.DictReader(f):
                 seen_ids.add(r["spotify_track_id"])
-                rows_out.append(r)
-        print(f"[*] Tìm thấy dữ liệu cũ: Đã có {len(seen_ids):,} bài trong '{output_csv}'.")
+        print(f"[*] Đã có {len(seen_ids):,} bài trong '{output_csv}'.")
 
-    # Mở file ghi tiếp tục
     file_exists = os.path.exists(output_csv)
     out_f = open(output_csv, "a", newline="", encoding="utf-8-sig")
     fieldnames = ["spotify_track_id", "title", "artist", "album", "release_date"]
@@ -133,7 +127,7 @@ def enrich_songs(input_csv=None, output_csv=None, limit=None, delay_range=(0.8, 
         out_f.flush()
 
     pending = [s for s in songs if s["spotify_track_id"] not in seen_ids]
-    print(f"[*] Số bài còn lại cần enrich: {len(pending):,} bài.\n")
+    print(f"[*] Số bài còn lại: {len(pending):,} bài.\n")
 
     try:
         for i, s in enumerate(pending, 1):
@@ -153,25 +147,23 @@ def enrich_songs(input_csv=None, output_csv=None, limit=None, delay_range=(0.8, 
             writer.writerow(row)
             out_f.flush()
 
-            print(f"-> Date: {r_date or 'N/A'} | Album: {album or 'N/A'}")
+            print(f"-> Date: {r_date or 'N/A'}")
             time.sleep(random.uniform(*delay_range))
 
     finally:
         out_f.close()
 
     print("\n" + "=" * 60)
-    print(f"HOÀN THÀNH ENRICH METADATA! Lưu tại: '{output_csv}'")
+    print(f"HOÀN THÀNH ENRICH METADATA! Đã lưu tại: '{output_csv}'")
     print("=" * 60)
 
 
 if __name__ == "__main__":
-    # Mặc định: Chạy test 5 bài nếu chạy trực tiếp
     import sys
     if "--full" in sys.argv:
         enrich_songs()
     elif len(sys.argv) > 1 and sys.argv[1].isdigit():
         enrich_songs(limit=int(sys.argv[1]))
     else:
-        print("=== CHẾ ĐỘ TEST: Chạy thử 5 bài đầu ===")
-        print("(Để chạy toàn bộ: python member1_step2b_htmlspotify_metadata.py --full)")
+        print("=== TEST NHANH 5 BÀI ===")
         enrich_songs(limit=5)
