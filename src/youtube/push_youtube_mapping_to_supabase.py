@@ -107,7 +107,7 @@ def load_final_selections():
 
 def build_mapping_records():
     selections = load_final_selections()
-    records = []
+    record_map = {}
 
     with open(CANDIDATES_FILE, "r", encoding="utf-8-sig", newline="") as f:
         for row in csv.DictReader(f):
@@ -148,7 +148,8 @@ def build_mapping_records():
 
             official_flag = is_official_source(source_ev, identity_ev)
 
-            records.append({
+            key = (track_id, cand_num)
+            record_map[key] = {
                 "spotify_track_id": track_id,
                 "candidate_number": cand_num,
                 "is_selected": is_selected,
@@ -168,9 +169,9 @@ def build_mapping_records():
                 "is_official": official_flag,
                 "decision_status": decision_status,
                 "status": row_status,
-            })
+            }
 
-    return records
+    return list(record_map.values())
 
 
 def main():
