@@ -1,4 +1,4 @@
-﻿spotify_track_id,spotify_title,spotify_artist,spotify_duration_ms,candidate_number,youtube_video_id,youtube_title,youtube_channel,youtube_duration,title_similarity,title_conflict,identity_evidence,source_evidence,duration_difference_ratio,hard_invalid
+spotify_track_id,spotify_title,spotify_artist,spotify_duration_ms,candidate_number,youtube_video_id,youtube_title,youtube_channel,youtube_duration,title_similarity,title_conflict,identity_evidence,source_evidence,duration_difference_ratio,hard_invalid
 6Im9k8u9iIzKMrmV7BWtlF,34+35,Ariana Grande,173710,1,B6_iQvaIjXw,Ariana Grande - 34+35 (official video),Ariana Grande,221,100.0,False,"[""exact_channel_artist"", ""artist_in_title""]","[""official_video""]",0.2722353347533245,False
 6Im9k8u9iIzKMrmV7BWtlF,34+35,Ariana Grande,173710,2,ssq6X6alZ3w,"Ariana Grande - 34+35 (Remix) ft. Doja Cat, Megan Thee Stallion",Ariana Grande,244,20.833333333333336,False,"[""exact_channel_artist"", ""artist_in_title""]",,0.404639917103218,False
 6Im9k8u9iIzKMrmV7BWtlF,34+35,Ariana Grande,173710,3,lR5raZbD7fE,34+35,Ariana Grande,174,100.0,False,"[""exact_channel_artist""]",,0.001669449081803005,False
@@ -7049,7 +7049,7 @@
 3iEUDvanZwQhLCIqUmCR7N,The Spins,Mac Miller,195873,3,hA1wo8_rn-g,The Spins Mac Miller (Music Video),TrvrBchr,232,62.06896551724138,False,"[""artist_in_title""]",,0.18444093877155096,False
 3iEUDvanZwQhLCIqUmCR7N,The Spins,Mac Miller,195873,4,7mhtAI6JspA,The Spins - Mac Miller (Clean),Mr. Scrub,181,75.0,False,"[""artist_in_title""]",,0.07593185380322964,False
 3iEUDvanZwQhLCIqUmCR7N,The Spins,Mac Miller,195873,5,AAeux_z4_O4,"Mac Miller, The Empire Of The Sun - The spins (Video no oficial)",Filmcoree,197,100.0,False,"[""artist_in_title""]",,0.005753728181015249,False
-4sIFi8LpJWPvI5xviWFyA6,D>E>A>T>H>M>E>T>A>L,Panchiko,261849,1,xlX7NwTq9Zo,DᐳEᐳAᐳTᐳHᐳMᐳEᐳTᐳAᐳL,Panchiko,262,52.63157894736843,True,"[""exact_channel_artist""]",,0.0005766682324545826,False
+4sIFi8LpJWPvI5xviWFyA6,D>E>A>T>H>M>E>T>A>L,Panchiko,261849,1,3dPvWnEpJJI,DEATHMETAL,Panchiko,262,52.63157894736843,True,"[""exact_channel_artist""]",,0.0005766682324545826,False
 4sIFi8LpJWPvI5xviWFyA6,D>E>A>T>H>M>E>T>A>L,Panchiko,261849,2,uq7fPNc4djo,PANCHIKO - DEATHMETAL,Panchiko,2898,68.96551724137932,True,"[""exact_channel_artist"", ""artist_in_title""]",,10.067447269227685,False
 4sIFi8LpJWPvI5xviWFyA6,D>E>A>T>H>M>E>T>A>L,Panchiko,261849,3,qlhahaRSBzw,PANCHIKO - DEATHMETAL,Panchiko,275,68.96551724137932,True,"[""exact_channel_artist"", ""artist_in_title""]",,0.050223602152385534,False
 4sIFi8LpJWPvI5xviWFyA6,D>E>A>T>H>M>E>T>A>L,Panchiko,261849,4,BQRkv-MZwJ8,Laputa,Panchiko,164,24.0,True,"[""exact_channel_artist""]",,0.37368483362548643,False

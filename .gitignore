@@ -8,3 +8,7 @@ __pycache__/
 
 .DS_Store
 .vscode/
+
+# Raw audio files (ignored due to size limits)
+data/raw/audio/*.wav
+data/raw/audio/*.mp3
