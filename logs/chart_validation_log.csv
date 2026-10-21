@@ -1,0 +1,25 @@
+﻿check,scope,status,value,expected,note
+rows_total,chart_weekly,PASS,161734.0,info,
+track_id_in_songs,chart_weekly,PASS,0.0,0,orphan rows
+market_in_VN_US_KR,chart_weekly,PASS,0.0,0,
+rank_in_1_200,chart_weekly,PASS,0.0,0,
+streams_not_null_nonnegative,chart_weekly,PASS,0.0,0,
+streams_equal_zero_rows,chart_weekly,PASS,1.0,info,"kept: streams is not used in ChartScore (known case: KR 2021-06-10, rank 101)"
+chart_date_valid,chart_weekly,PASS,0.0,0,
+chart_date_all_thursday,chart_weekly,PASS,0.0,0,
+no_duplicate_track_market_date,chart_weekly,PASS,0.0,0,
+rank_gt_100_share,chart_weekly,PASS,0.5049,info,Top-200 chart -> chart_score can be negative
+pairs_total,chart_performance,PASS,10887.0,info,chart_performance table
+no_duplicate_track_market,chart_performance,PASS,0.0,0,
+chart_score_equals_101_minus_avg,chart_performance,PASS,1.4210854715202004e-14,<1e-9,
+pairs_match_source,chart_performance,PASS,0.0,0,pairs only in one side
+lifetime_average_rank_matches_source,chart_performance,PASS,0.0,<1e-9,
+peak_rank_matches_source,chart_performance,PASS,0.0,<1e-9,
+weeks_on_chart_matches_source,chart_performance,PASS,0.0,<1e-9,
+weeks_in_top10_matches_source,chart_performance,PASS,0.0,<1e-9,
+weeks_sum_equals_clean_rows,chart_performance,PASS,161734.0,161734,
+no_null_scores,chart_performance,PASS,0.0,0,
+negative_chart_score_pairs,chart_performance,PASS,6682.0,info,expected when avg rank > 101 (Top-200 chart)
+pairs_by_market,KR,PASS,3783.0,info,
+pairs_by_market,US,PASS,4460.0,info,
+pairs_by_market,VN,PASS,2644.0,info,
