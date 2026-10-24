@@ -12,3 +12,6 @@ __pycache__/
 # Raw audio files (ignored due to size limits)
 data/raw/audio/*.wav
 data/raw/audio/*.mp3
+
+# Processed audio feature datasets (stored in Supabase, not git)
+data/processed/audio_*.csv
