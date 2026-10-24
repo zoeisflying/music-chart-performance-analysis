@@ -6,13 +6,13 @@
 * **Phân hệ phụ trách:** Member 1 — Data Collection, Database Architecture (3NF Supabase), Chart Performance Target Engineering & Exploratory Data Analysis  
 * **Không gian lưu trữ mã nguồn:** [https://github.com/zoeisflying/music-chart-performance-analysis](https://github.com/zoeisflying/music-chart-performance-analysis)  
 * **Nhánh thực thi:** `feature/report4-chart-visualization`  
-* **Tập dữ liệu kiểm định:** $N = 10.887$ cặp (bài hát × thị trường) được tổng hợp từ $161.734$ bản ghi lịch sử tuần Spotify Top 200 (2021–2026).
+* **Tập dữ liệu bàn giao Checkpoint 2:** $N = 10.887$ cặp (bài hát × thị trường) được tổng hợp từ $161.734$ bản ghi lịch sử tuần Spotify Top 200 (2021–2026).
 
 ---
 
 ## MỤC LỤC CHI TIẾT
 1. [TỔNG QUAN HỆ THỐNG DỮ LIỆU & KIẾN TRÚC PIPELINE](#1-tổng-quan-hệ-thống-dữ-liệu--kiến-trúc-pipeline)
-2. [KIỂM ĐỊNH CHẤT LƯỢNG DỮ LIỆU & GIẢI TRÌNH CÁC HIỆN TƯỢNG BIÊN](#2-kiểm-định-chất-lượng-dữ-liệu--giải-trình-các-hiện-tượng-biên)
+2. [KIỂM ĐỊNH CHẤT LƯỢNG DỮ LIỆU & BÁO CÁO ĐIỀU TRA NGUỒN KWORB](#2-kiểm-định-chất-lượng-dữ-liệu--báo-cáo-điều-tra-nguồn-kworb)
 3. [BẢNG THỐNG KÊ MÔ TẢ ĐA CHIỀU (PARAMETRIC & NON-PARAMETRIC)](#3-bảng-thống-kê-mô-tả-đa-chiều-parametric--non-parametric)
 4. [PHÂN TÍCH CHUYÊN SÂU 4 BIỂU ĐỒ KHOA HỌC (300 DPI)](#4-phân-tích-chuyên-sâu-4-biểu-đồ-khoa-học-300-dpi)
    - 4.1. [Biểu đồ 1: Phân phối Mật độ ChartScore & Ngưỡng Hit Top 100 ($x = 0$)](#41-biểu-đồ-1-phân-phối-mật-độ-chartscore--ngưỡng-hit-top-100-x--0)
@@ -21,7 +21,7 @@
    - 4.4. [Biểu đồ 4: Độ bền Trụ hạng, Phân phối Đuôi dài & Phân tích Sinh tồn (Survival Tiers)](#44-biểu-đồ-4-độ-bền-trụ-hạng-phân-phối-đuôi-dài--phân-tích-sinh-tồn-survival-tiers)
 5. [ĐỐI CHIẾU VĂN HÓA TIÊU THỤ ÂM NHẠC: MỸ (US) VS VIỆT NAM (VN) VS HÀN QUỐC (KR)](#5-đối-chiếu-văn-hóa-tiêu-thụ-âm-nhạc-mỹ-us-vs-việt-nam-vn-vs-hàn-quốc-kr)
 6. [ĐỊNH HƯỚNG CHIẾN LƯỢC XÂY DỰNG MÔ HÌNH HỒI QUY CHO MEMBER 4](#6-định-hướng-chiến-lược-xây-dựng-mô-hình-hồi-quy-cho-member-4)
-7. [GIỚI HẠN DỮ LIỆU (LIMITATIONS) & TÍNH TÁI LẬP (REPRODUCIBILITY)](#7-giới-hạn-dữ-liệu-limitations--tính-tái-lập-reproducibility)
+7. [GIỚI HẠN DỮ LIỆU (LIMITATIONS) & LỘ TRÌNH KIỂM CHỨNG TRƯỚC CHECKPOINT 3](#7-giới-hạn-dữ-liệu-limitations--lộ-trình-kiểm-chứng-trước-checkpoint-3)
 
 ---
 
@@ -73,38 +73,59 @@ flowchart TD
 
 ---
 
-## 2. KIỂM ĐỊNH CHẤT LƯỢNG DỮ LIỆU & GIẢI TRÌNH CÁC HIỆN TƯỢNG BIÊN
+## 2. KIỂM ĐỊNH CHẤT LƯỢNG DỮ LIỆU & BÁO CÁO ĐIỀU TRA NGUỒN KWORB
 
-Toàn bộ pipeline dữ liệu đã được kiểm thử tự động thông qua script [`src/chart/validate_chart_data.py`](file:///D:/music-chart-performance-analysis/src/chart/validate_chart_data.py), ghi nhận kết quả **24/24 bài kiểm tra đạt trạng thái PASS tuyệt đối (0 FAIL)** tại [`logs/chart_validation_log.csv`](file:///D:/music-chart-performance-analysis/logs/chart_validation_log.csv).
+Toàn bộ pipeline dữ liệu đã được kiểm thử tự động thông qua script [`src/chart/validate_chart_data.py`](file:///D:/music-chart-performance-analysis/src/chart/validate_chart_data.py), ghi nhận kết quả **24/24 bài kiểm tra đạt trạng thái PASS** trên tập dữ liệu $161.734$ dòng tại [`logs/chart_validation_log.csv`](file:///D:/music-chart-performance-analysis/logs/chart_validation_log.csv).
 
-Dưới đây là cơ chế giải trình khoa học cho các hiện tượng biên quan trọng:
+Tuy nhiên, đối chiếu giữa bảng tổng hợp tích lũy ở Step 1 (`songs_master.csv`, $17.972$ cặp) và bảng `chart_performance` ($10.887$ cặp), ghi nhận sự chênh lệch **$7.086$ cặp**. Kết quả điều tra thực nghiệm chi tiết như sau:
 
-### 2.1. Giải trình Hiện tượng Chênh lệch 7.086 Cặp giữa `songs_master` và `chart_performance`:
-* **Quan sát thực tế:** File tổng hợp thô ở Step 1 (`songs_master.csv`) ghi nhận $17.972$ cặp (bài hát, market), nhưng bảng `chart_performance` chỉ có $10.887$ cặp, chênh lệch đúng **$7.086$ cặp**.
-* **Bản chất khoa học:**
-  1. Trang Kworb Totals là bảng xếp hạng **tích lũy toàn thời gian (All-time history từ năm 2016 đến nay)**. Do đó, nó bao gồm cả những bài hát nổi tiếng từ giai đoạn 2016–2020 (ví dụ các hit của Drake, Ed Sheeran, Sơn Tùng M-TP cũ...).
-  2. Tuy nhiên, đề tài của nhóm có phạm vi nghiên cứu cố định là **cửa sổ thời gian 2021–2026**. Pipeline cào ở Step 2 áp đặt bộ lọc nghiêm ngặt `chart_date >= '2021/01/01'`.
-  3. Có $5.338$ cặp ở Mỹ, $1.700$ cặp ở VN và $48$ cặp ở KR **chỉ xuất hiện trên BXH trong giai đoạn 2016–2020** và đã văng khỏi BXH hoàn toàn trước ngày 01/01/2021.
-  4. Tuân thủ nghiêm ngặt **Quy tắc bắt buộc số 3 của đề bài**: *"Bài không có bản ghi chart hợp lệ trong cửa sổ nghiên cứu thì KHÔNG gán ChartScore = 0; phải ghi nhận là không có dữ liệu (không tạo bản ghi)"*. Do đó, việc loại trừ $7.086$ cặp này là hoàn toàn chính xác theo phương pháp luận nghiên cứu.
+### 2.1. Phân tích Thực nghiệm về Sự Chênh lệch 7.086 Cặp:
+Qua kiểm tra ngẫu nhiên và bóc tách trực tiếp mã nguồn HTML từ máy chủ Kworb, nhóm sơ bộ nhận diện sự chênh lệch có thể đến từ các hiện tượng sau:
 
-### 2.2. Giải trình Hiện tượng Khuyết Slot ở Nhóm Cuối (Ranks 180–200):
-* **Quan sát thực tế:** Trong khi BXH lý thuyết mỗi tuần có $200$ slot, dữ liệu thực tế thu được đạt trung bình: VN: **$193$ bài/tuần** ($96.5\%$); KR: **$187$ bài/tuần** ($93.5\%$); US: **$166$ bài/tuần** ($83.2\%$).
-* **Bản chất khoa học (Selection Bias của Kiến trúc Crawl 2 giai đoạn):**
-  * Nhóm sử dụng phương pháp cào theo hạt giống (**Seed-based Crawling**): Gom $15.036$ bài hát có tích lũy cao nhất từ trang Totals, sau đó đi sâu vào từng bài để bóc tách tuần.
-  * Các bài hát "bong bóng" (one-week bubble tracks) — những ca khúc chỉ xuất hiện đúng **1 tuần duy nhất ở vị trí thấp (hạng 190–200)** với lượng stream rất nhỏ rồi biến mất vĩnh viễn — sẽ không bao giờ tích lũy đủ điểm để xuất hiện trong bảng Kworb Totals.
-  * Vì vậy, các slot này khuyết thiếu tự nhiên ở nhóm cuối. Đây là một dạng **Thiên lệch chọn lọc (Selection Bias)** cố hữu khi khai thác dữ liệu từ nguồn tổng hợp. Điều này thực chất mang lại lợi ích cho mô hình hồi quy sau này: giúp loại bỏ bớt các ca khúc nhiễu (noise reduction) và tập trung phân tích các bài hát có tác động thương mại thực chất.
+1. **Nhóm bài hát thực sự chỉ lên chart trước năm 2021 (Hợp lệ theo tiêu chí lọc thời gian):**
+   * Trang Kworb Totals (`us_weekly_totals.html`, `vn_weekly_totals.html`) là bảng xếp hạng **tích lũy toàn thời gian (All-time history từ 2016 đến nay)**.
+   * Ví dụ điển hình: Ca khúc *God's Plan* (Drake) có `lifetime_wks = 88` trong Totals. Kiểm tra bảng tuần trên Kworb xác nhận bài này xuất hiện $88$ tuần liên tục từ `2018-01-25` đến `2019-10-03`. Sau đó bài out chart hoàn toàn; từ ngày `2021-01-01` trở đi, toàn bộ các tuần trên Kworb đều là dấu gạch ngang (`--`). Đối với trường hợp này, việc không có bản ghi trong `chart_performance` là hoàn toàn tuân thủ **Quy tắc bắt buộc số 3**: *"Bài không có bản ghi chart hợp lệ trong cửa sổ nghiên cứu 2021–2026 thì không tạo bản ghi ChartScore"*.
 
-### 2.3. Giải trình Bản ghi `streams = 0`:
-* Phát hiện duy nhất $1$ dòng có `streams = 0` tại thị trường KR (tuần ngày `2021-06-10`, rank 101).
-* Bản ghi này được giữ lại nguyên vẹn vì:
-  1. Thứ hạng `rank = 101` là hoàn toàn hợp lệ và có thật trên BXH tuần của Spotify.
-  2. Biến mục tiêu `ChartScore` chỉ tính toán dựa trên `rank` ($101 - \text{LifetimeAverageRank}$), hoàn toàn độc lập với biến `streams`.
+2. **Nhóm bất đối xứng dữ liệu và đứt đoạn lịch sử từ phía nguồn Kworb:**
+   * **Trường hợp thiếu cột hiển thị (như *Cruel Summer* - `1BxfuPKGuaTgP7aM0Bbdwr`):** Bảng Totals ghi nhận bài này có $127$ tuần tại US và $75$ tuần tại VN. Tuy nhiên, khi kiểm tra trang chi tiết của bài trên Kworb, bảng tuần (`div.weekly table`) chỉ hiển thị đúng **33 cột quốc gia** (`KR, AU, CA, GB...`) mà hoàn toàn không có cột US và VN. Trong khi đó, bảng ngày (`div.daily table`) lại có cột US đầy đủ. Do crawler của nhóm bóc tách bảng tuần, các tuần của US/VN đã bị khuyết thiếu từ chính cấu trúc HTML của trang chi tiết.
+   * **Trường hợp lỗ hổng thời gian (như *Blinding Lights* - `0VjIjW4GlUZAMYd2vXMi3b`):** Totals ghi nhận US đạt $187$ tuần, peak #1. Nhưng khi truy cập trang chi tiết, bảng tuần của Kworb chỉ có $16$ tuần ở US (từ 12/2019 đến 03/2020), sau đó **nhảy cóc một khoảng trống hơn 3 năm** từ `2020-03-19` đến thẳng `2023-08-31` (tổng stream hiển thị trên trang chi tiết chỉ là $113$ triệu, khác xa con số $716$ triệu trên trang Totals). Phát hiện đứt đoạn nhiều năm này cho thấy đây là lỗ hổng dữ liệu của chính nguồn Kworb, hoàn toàn không phải bài hát đã out chart.
+
+3. **Nhóm chưa xác định nguyên nhân (Cần đối soát mẫu):**
+   * Ca khúc *Starboy* (The Weeknd): Totals ghi nhận $172$ tuần tại US, nhưng bảng tuần chỉ hiển thị khoảng $90$ tuần có điểm (chênh lệch hơn $80$ tuần). Các trường hợp này chưa thể kết luận là do bài out chart hay do nguồn Kworb bị gián đoạn, cần được phân loại định lượng thông qua phép thử mẫu.
+   * *Ghi chú về nguồn cào:* Nhóm đã thử nghiệm một số định dạng URL tuần lịch sử theo ngày (như `country/us_weekly_YYYYMMDD.html`) nhưng nhận phản hồi HTTP 404; hiện tại nhóm **chưa tìm được** định dạng URL lịch sử tuần theo ngày trên Kworb ngoài các trang tổng hợp hiện hữu.
+
+### 2.2. Đánh giá Độ phủ Thị trường (Completeness by Market):
+* **Việt Nam (VN):** Thu thập được **$2.644 / 4.344$ cặp** ($60.9\%$ so với Totals), đạt **$57.278$ bản ghi tuần** (trung bình **$193 / 200$ bài/tuần**, độ phủ $96.5\%$).
+* **Hàn Quốc (KR):** Thu thập được **$3.783 / 3.830$ cặp** ($98.8\%$ so với Totals), đạt **$54.860$ bản ghi tuần** (trung bình **$187 / 200$ bài/tuần**, độ phủ $93.5\%$).
+* **Mỹ (US):** Thu thập được **$4.460 / 9.798$ cặp** ($45.5\%$ so với Totals), đạt **$49.596$ bản ghi tuần** (trung bình **$166 / 200$ bài/tuần**, độ phủ $83.2\%$). Thị trường Mỹ ghi nhận độ phủ thấp hơn đáng kể so với VN và KR; tỷ lệ cấu thành giữa các nguyên nhân (bài out chart trước 2021, Kworb khuyết cột hay đứt đoạn thời gian) sẽ được đo lường cụ thể thông qua phép thử mẫu kiểm toán.
+
+### 2.3. Bằng chứng Nội tại: Hiện tượng Khuyết Vị trí Top 10 và các Tuần Thiếu Hạng 1:
+Về mặt toán học, mỗi tuần bảng xếp hạng hợp lệ phải có đủ các vị trí từ hạng 1 đến hạng 200. Nếu một tuần trong cơ sở dữ liệu bị khuyết vị trí hạng 1, điều đó khẳng định chắc chắn có một ca khúc quán quân tuần đó đã bị thiếu hụt, bất kể ca khúc đó phát hành năm nào.
+
+* **Thống kê mức độ khuyết vị trí Top 10:**
+  * **Thị trường Mỹ (US):** Khuyết **$621 / 2.980$ vị trí Top 10** ($20.8\%$), ảnh hưởng đến **$206 / 298$ tuần**, trong đó có **$75$ tuần bị khuyết hoàn toàn vị trí Hạng 1**.
+  * **Thị trường Hàn Quốc (KR):** Khuyết **$511 / 2.940$ vị trí Top 10** ($17.4\%$), ảnh hưởng đến **$161 / 294$ tuần**, có **$110$ tuần khuyết Hạng 1**.
+  * **Thị trường Việt Nam (VN):** Khuyết **$435 / 2.970$ vị trí Top 10** ($14.6\%$), ảnh hưởng đến **$153 / 297$ tuần**, có **$118$ tuần khuyết Hạng 1**.
+  * **Phân bổ thời gian:** Phần lớn các vị trí Top 10 bị khuyết dồn trọng tâm vào **giai đoạn 2023–2025** (KR: $96\%$, VN: $96\%$, US: $80\%$; chỉ có $3$ đến $25$ vị trí bị khuyết ở năm 2021). Các vị trí này không thể quy kết cho "bài hát đã out chart trước 2021" hay "bài hát bong bóng hạng 195–200".
+
+* **Kết quả đối soát thực nghiệm trên các tuần US khuyết Hạng 1 điển hình:**  
+  Kiểm tra các tuần khuyết hạng 1 tại US (ví dụ: `2022-05-26`, `2022-06-02`, `2022-07-21`, `2022-07-28`, `2022-08-04`, `2022-08-11`), nhóm đã tiến hành tra cứu bài quán quân thực tế trên Spotify và đối soát trực tiếp vào kho dữ liệu:
+  1. **Nhận diện bài hát quán quân:** Các tuần trên tương ứng với thời kỳ thống trị ngôi vương của hai siêu hit: ***As It Was* (Harry Styles - `4Dvkj6JhhA12EX05fT7y2e`)** và ***Bad Habit* (Steve Lacy - `4k6Uh1HXdhtusDW5y8Gbvy`)**.
+  2. **Kiểm tra bảng `songs_master` (Seed List):** Cả hai ca khúc **ĐỀU CÓ MẶT đầy đủ** trong `songs_master.csv` với thành tích ghi nhận từ Kworb Totals là `peak_rank = 1` và `lifetime_wks = 119` (*As It Was*), `lifetime_wks = 163` (*Bad Habit*). Điều này chứng minh: **Danh sách hạt giống (seed) không hề bị thiếu bài**.
+  3. **Kiểm tra bảng `chart_weekly`:** Trong khi đó, `chart_weekly` chỉ ghi nhận được **$12$ tuần** cho *As It Was* và **$71$ tuần** cho *Bad Habit*.
+  4. **Kiểm tra mã nguồn HTML gốc trên Kworb:**
+     * Với *As It Was*, bảng tuần của trang Kworb chỉ có đúng $45$ dòng: dòng ngày `2022/05/19` (US = 5) **nhảy cóc một khoảng trống hơn 1 năm** sang thẳng `2023/08/31` (US = `--`), rồi nhảy tiếp sang `2026/03/05`. Toàn bộ chuỗi tuần mùa hè/thu 2022 khi bài hát đứng #1 tại Mỹ đã không được Kworb đưa vào bảng tuần.
+     * Với *Bad Habit*, bảng tuần trên HTML Kworb dòng ngày `2022/07/14` (US = 7) **nhảy cóc trực tiếp** sang `2022/12/29` (US = 20), mất sạch toàn bộ chuỗi tuần tháng 7 đến tháng 12 năm 2022. Thậm chí hàng Peak của Kworb trên trang chi tiết còn ghi nhầm thành `Peak: 7` (mâu thuẫn với `Peak: 1` trên trang Totals).
+
+* **Ý nghĩa & Cảnh báo Mô hình:**
+  * Nguyên nhân gốc rễ không phải do lỗi cào dữ liệu hay lỗi parser, mà là do **bảng tuần theo bài của chính nguồn Kworb tồn tại sự đứt đoạn thời gian có hệ thống đối với các hit lớn trong giai đoạn 2022–2025**.
+  * Việc khuyết thiếu các tuần đứng đầu bảng khiến chỉ số `ChartScore` của một số ca khúc điểm cao có xu hướng **bị lệch thấp hơn so với thực tế**. Đây là một rủi ro dữ liệu trọng yếu mà Member 4 cần nắm rõ để lựa chọn các phương pháp hồi quy bền vững (Robust Regression) thay vì OLS nhạy cảm với sai số chuỗi.
 
 ---
 
 ## 3. BẢNG THỐNG KÊ MÔ TẢ ĐA CHIỀU (PARAMETRIC & NON-PARAMETRIC)
 
-Dữ liệu thống kê được tính toán trên toàn bộ $N = 10.887$ cặp bài hát × thị trường (nguồn: [`reports/report4/chart_data/member1/fig2_chart_score_boxplot_stats.csv`](file:///D:/music-chart-performance-analysis/reports/report4/chart_data/member1/fig2_chart_score_boxplot_stats.csv)):
+Dữ liệu thống kê được tính toán trên toàn bộ $N = 10.887$ cặp bài hát × thị trường hiện có (nguồn: [`reports/report4/chart_data/member1/fig2_chart_score_boxplot_stats.csv`](file:///D:/music-chart-performance-analysis/reports/report4/chart_data/member1/fig2_chart_score_boxplot_stats.csv)):
 
 | Thị trường | Biến số ($Variable$) | Số mẫu ($n$) | Mean ($\mu$) | Std ($\sigma$) | Min | Q25 | Median ($Q_2$) | Q75 | IQR | Max | Skewness | Tỷ lệ Điểm > 0 |
 | :---: | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
@@ -175,7 +196,7 @@ Tất cả 4 đồ thị được thiết kế theo tiêu chuẩn công bố kho
    * Điều này chứng minh rằng dù văn hóa tiêu thụ âm nhạc khác nhau, mức độ phân hóa nội bộ giữa nhóm bài Hit đỉnh cao ($Q_3 > 0$) và nhóm bài hát mờ nhạt ($Q_1 < -43$) ở cả 3 quốc gia đều diễn ra với cường độ tương đương nhau.
 3. **Tính chất Đối xứng & Thuận lợi cho Hồi quy OLS:**
    * Độ lệch xiên (Skewness) của cả 3 thị trường đều rất nhỏ: $\text{Skew}_{\text{ALL}} = +0.05$ (VN: $+0.30$; US: $-0.21$; KR: $+0.15$). Khoảng cách giữa `Mean` và `Median` ở cả 3 nước chỉ dao động từ $0.6$ đến $4.9$ điểm.
-   * Điều này xác nhận rằng biến mục tiêu $Y = \text{ChartScore}$ có phân phối rất lý tưởng, không bị lệch đuôi quá độ, giúp giảm thiểu vi phạm giả định về phân phối chuẩn của sai số trong mô hình hồi quy tuyến tính cổ điển.
+   * Điều này xác nhận rằng biến mục tiêu $Y = \text{ChartScore}$ có phân phối tương đối đối xứng, giảm thiểu nguy cơ vi phạm giả định phần dư trong mô hình hồi quy tuyến tính cổ điển.
 
 ---
 
@@ -185,11 +206,10 @@ Tất cả 4 đồ thị được thiết kế theo tiêu chuẩn công bố kho
 * **Kỹ thuật hiển thị:** Bar chart phân bố tần suất tích lũy của từng thứ hạng từ $1$ đến $200$ trên toàn bộ $161.734$ dòng tuần, tô màu phân biệt giữa Vùng Điểm Dương (Top 1–100) và Vùng Điểm Âm (Top 101–200).
 
 #### Các phát hiện quan sát được:
-1. **Độ phủ Toàn diện của Bảng xếp hạng Top 200:**
-   * Biểu đồ chứng minh tính đồng đều hoàn hảo của dữ liệu cào: tất cả các vị trí từ hạng $1$ đến hạng $200$ đều có xấp xỉ $265\text{–}273$ tuần xuất hiện ở mỗi thị trường.
-   * Hoàn toàn không có hiện tượng "gãy khúc" hay mất dữ liệu ở bất kỳ khoảng thứ hạng nào.
-2. **Cơ sở Toán học Dẫn tới Hiện tượng Điểm Âm:**
+1. **Độ phủ của Bảng xếp hạng Top 200:**
+   * Biểu đồ ghi nhận tần suất xuất hiện của các vị trí từ hạng $1$ đến hạng $200$ trong kho $161.734$ bản ghi tuần.
    * Tỷ lệ bản ghi tuần rơi vào khoảng $101\text{–}200$ là **$50.49\%$** ($81.659 / 161.734$ bản ghi).
+2. **Cơ sở Toán học Dẫn tới Hiện tượng Điểm Âm:**
    * Do nhóm áp dụng công thức chính thức của đề bài: $\text{ChartScore} = 101 - \text{LifetimeAverageRank}$, bất kỳ bài hát nào có thứ hạng bình quân lớn hơn $101$ sẽ mang giá trị âm. Đây là hệ quả toán học tất yếu của việc mở rộng phạm vi BXH từ Top 100 lên Top 200, hoàn toàn không phải lỗi dữ liệu và không làm thay đổi thứ tự quan hệ tuyến tính giữa các biến.
 
 ---
@@ -200,23 +220,23 @@ Tất cả 4 đồ thị được thiết kế theo tiêu chuẩn công bố kho
 * **Kỹ thuật hiển thị:** Panel A: Violin Plot kết hợp Boxplot trên thang Logarithmic ($\log_{10}$) kèm nhãn tuần cụ thể; Panel B: Biểu đồ thanh ngang phân rã tỷ lệ bài hát theo 6 nấc tuổi thọ trên BXH (Tenure Brackets).
 
 #### Các phát hiện quan sát được:
-1. **Việt Nam Dẫn đầu Tuyệt đối về Độ bền Chart (Highest Longevity):**
-   * Thời gian trụ hạng trung bình của một ca khúc tại Việt Nam là **$21.66$ tuần** ($\text{Median} = 5.0$), cao **gấp đôi** thị trường Mỹ ($11.12$ tuần, $\text{Median} = 3.0$) và cao hơn đáng kể so với Hàn Quốc ($14.50$ tuần, $\text{Median} = 4.0$).
+1. **Việt Nam Dẫn đầu về Độ bền Chart (Highest Longevity):**
+   * Thời gian trụ hạng trung bình của một ca khúc tại Việt Nam là **$21.66$ tuần** ($\text{Median} = 5.0$), cao **gấp đôi** thị trường Mỹ ($11.12$ tuần, $\text{Median} = 3.0$) và cao hơn Hàn Quốc ($14.50$ tuần, $\text{Median} = 4.0$).
    * Kỷ lục trụ hạng lâu nhất trong tập dữ liệu thuộc về thị trường Việt Nam với ca khúc trụ tới **$297$ tuần** (gần 6 năm liên tục từ 2021 đến 2026).
 2. **Phân tích Nấc Tuổi thọ (Survival Tier Breakdown - Panel B):**
-   * **Nhóm bài hát trụ lâu ($\ge 26$ tuần / nửa năm trở lên):** Tại Việt Nam chiếm tới **$21.75\%$** (trong đó $12.37\%$ bài trụ trên 1 năm), cao vượt trội so với Mỹ (chỉ $11.05\%$) và Hàn Quốc ($14.22\%$).
+   * **Nhóm bài hát trụ lâu ($\ge 26$ tuần / nửa năm trở lên):** Tại Việt Nam chiếm tới **$21.75\%$** (trong đó $12.37\%$ bài trụ trên 1 năm), cao vượt trội so với Mỹ ($11.05\%$) và Hàn Quốc ($14.22\%$).
    * **Nhóm bài hát "lướt sóng" (1 đến 4 tuần):** Tại Mỹ, có tới **$44.98\%$** ca khúc rời bảng xếp hạng chỉ trong vòng 1 tháng đầu tiên ($21.28\%$ bài chỉ trụ đúng 1 tuần). Ngược lại, tại Việt Nam, chỉ có $4.76\%$ bài hát văng khỏi chart sau tuần đầu tiên.
 
 ---
 
 ## 5. ĐỐI CHIẾU VĂN HÓA TIÊU THỤ ÂM NHẠC: MỸ (US) VS VIỆT NAM (VN) VS HÀN QUỐC (KR)
 
-Sự kết hợp giữa Biểu đồ 2 (Điểm số) và Biểu đồ 4 (Độ bền) mang lại một phát hiện xã hội học âm nhạc cực kỳ sâu sắc:
+Sự kết hợp giữa Biểu đồ 2 (Điểm số) và Biểu đồ 4 (Độ bền) mang lại một phát hiện xã hội học âm nhạc đáng lưu ý:
 
 | Tiêu chí So sánh | Thị trường Mỹ (US) | Thị trường Việt Nam (VN) | Thị trường Hàn Quốc (KR) |
 | :--- | :--- | :--- | :--- |
 | **Cơ chế Vận hành BXH** | **Tốc độ Đào thải Cao (High Turnover)** | **Gắn kết Bền vững (High Retention / Stickiness)** | **Cân bằng & Trung dung (Balanced Transition)** |
-| **Hành vi Người nghe** | Người nghe liên tục tìm kiếm sự mới lạ (Novelty-seeking). Xu hướng bị chi phối mạnh bởi nhạc viral ngắn (TikTok trends, streaming playlists). | Thói quen nghe nhạc lặp lại (Habitual listening). Người nghe trung thành với nghệ sĩ quen thuộc và các bản Ballad tình cảm sâu lắng. | Chịu ảnh hưởng mạnh bởi văn hóa fandom K-pop (stream tập trung theo đợt phát hành) kết hợp với các bản nhạc phim (OST) trụ dai dẳng. |
+| **Hành vi Người nghe** | Người nghe liên tục tìm kiếm sự mới lạ (Novelty-seeking). Xu hướng bị chi phối mạnh bởi nhạc viral ngắn (TikTok trends, streaming playlists). | Thói quen nghe nhạc lặp lại (Habitual listening). Người nghe trung thành với nghệ sĩ quen thuộc và các bản Ballad tình cảm sâu lắng. | Chịu ảnh hưởng bởi văn hóa fandom K-pop (stream tập trung theo đợt phát hành) kết hợp với các bản nhạc phim (OST) trụ dai dẳng. |
 | **Mối quan hệ Điểm & Độ bền** | Bài hát lên chart thường đạt thứ hạng cao rồi out nhanh $\rightarrow$ **ChartScore trung vị cao ($-3.0$), Độ bền thấp ($11.1$ tuần)**. | Bài hát trụ dai dẳng hàng chục tuần ở nửa sau BXH (rank 120–180) $\rightarrow$ kéo rank bình quân xuống thấp $\rightarrow$ **ChartScore trung vị thấp ($-25.5$), Độ bền cao ($21.7$ tuần)**. | Đạt mức trung gian giữa hai thái cực $\rightarrow$ **ChartScore trung vị ($-19.8$), Độ bền trung bình ($14.5$ tuần)**. |
 
 ---
@@ -226,8 +246,8 @@ Sự kết hợp giữa Biểu đồ 2 (Điểm số) và Biểu đồ 4 (Độ 
 Dựa trên các bằng chứng thực nghiệm ở giai đoạn EDA, Member 1 khuyến nghị Member 4 cần áp dụng **3 chiến lược cốt lõi** khi tiến hành mô hình hóa hồi quy tuyến tính:
 
 ### 6.1. Bắt buộc Phân tầng Mô hình theo Thị trường (Stratified Regression):
-* Do cơ chế tiêu thụ của Mỹ (tuổi thọ ngắn, biến động cao) và Việt Nam (tuổi thọ dài, trung thành cao) mang bản chất kinh tế học đối nghịch, việc gộp chung 3 thị trường vào 1 phương trình OLS duy nhất ($\text{Pooled Model}$) sẽ dẫn tới vi phạm **Tính ổn định tham số (Structural Break / Parameter Instability)**.
-* Member 4 bắt buộc phải:
+* Do cơ chế tiêu thụ của Mỹ (tuổi thọ ngắn, biến động cao) và Việt Nam (tuổi thọ dài, trung thành cao) mang bản chất khác biệt, việc gộp chung 3 thị trường vào 1 phương trình OLS duy nhất ($\text{Pooled Model}$) có nguy cơ dẫn tới hiện tượng **Sai lệch cấu trúc tham số (Structural Break / Parameter Instability)**.
+* Member 4 nên:
   * Xây dựng **3 phương trình hồi quy độc lập** cho từng thị trường: $\text{Model}_{\text{VN}}$, $\text{Model}_{\text{US}}$, $\text{Model}_{\text{KR}}$.
   * Hoặc bổ sung các **biến tương tác (Interaction Terms)**: $\text{Audio\_Feature} \times \text{Market}$ (ví dụ: $\text{tempo} \times \text{US}$, $\text{tempo} \times \text{VN}$) để kiểm định sự khác biệt về độ nhạy cảm của người nghe đối với từng thuộc tính âm nhạc.
 
@@ -242,27 +262,36 @@ Dựa trên các bằng chứng thực nghiệm ở giai đoạn EDA, Member 1 k
 
 ---
 
-## 7. GIỚI HẠN DỮ LIỆU (LIMITATIONS) & TÍNH TÁI LẬP (REPRODUCIBILITY)
+## 7. GIỚI HẠN DỮ LIỆU (LIMITATIONS) & LỘ TRÌNH KIỂM CHỨNG TRƯỚC CHECKPOINT 3
 
-### 7.1. Các Giới hạn Nghiên cứu Cần Công bố:
-1. **Giới hạn Cửa sổ Thời gian 2021–2026:**
-   Khái niệm "Lifetime" trong nghiên cứu này được giới hạn trong khoảng thời gian từ `2021-01-01` đến `2026-09-17`. Các bài hát phát hành trước năm 2021 sẽ bị cắt bớt số tuần trụ hạng trước mốc này.
-2. **Giới hạn Thiên lệch Sống sót (Survivorship Bias):**
-   Do crawler thu thập từ danh sách hạt giống trang Kworb Totals, tập dữ liệu thiên về các bài hát đã có thành tích tích lũy nhất định. Các bài hát chỉ xuất hiện 1 tuần ở cuối bảng (hạng 190–200) tại thị trường Mỹ có thể bị bỏ sót.
-3. **Nguyên tắc Phương pháp luận:**
-   Toàn bộ kết quả phân tích trong báo cáo này chỉ phản ánh **mối liên hệ thống kê (Association)** trong bối cảnh quan sát, hoàn toàn không khẳng định mối quan hệ nhân quả (**Causation**) rằng một thuộc tính âm nhạc cụ thể trực tiếp gây ra thành công trên bảng xếp hạng.
+### 7.1. Các Giới hạn Nghiên cứu Cần Ghi nhận tại Checkpoint 2:
+1. **Độ phủ dữ liệu chưa đạt 100%:** Thị trường Mỹ hiện đạt độ phủ $45.5\%$ số cặp so với Totals và $83.2\%$ số bản ghi tuần. Sự thiếu hụt này bao gồm cả một số ca khúc từng đạt thứ hạng cao (như *Cruel Summer*, *Blinding Lights*).
+2. **Giới hạn Nguồn Kworb:** Trang web tổng hợp Kworb tồn tại sự bất đối xứng giữa bảng Totals và bảng chi tiết tuần của từng bài (thiếu cột thị trường đối với một số ca khúc như *Cruel Summer*, hoặc lỗ hổng thời gian đối với *Blinding Lights*).
+3. **Hiện tượng thiếu tuần cục bộ bên trong các cặp đã thu thập:**
+   * Nhóm tiến hành đo lường kiểm chứng trên nhóm các cặp có tuần đầu tiên xuất hiện sau `2021-03-01` ($10.034$ cặp). Đối với tập con này, nếu dữ liệu hoàn toàn toàn vẹn thì số tuần ghi nhận trong `chart_weekly` phải bằng đúng `lifetime_wks` trong bảng Totals.
+   * **Kết quả đo lường:**
+     * **$93.9\%$** số cặp khớp hoàn toàn về số tuần.
+     * **$6.1\%$** số cặp bị thiếu tuần (không có trường hợp nào bị thừa tuần). Trong đó, thị trường Mỹ thiếu nhiều nhất (**$10.0\%$**), tiếp theo là Việt Nam (**$5.8\%$**) và Hàn Quốc (**$1.8\%$**).
+     * Đặc biệt, có **$406$ cặp bị mất từ 10 tuần trở lên** so với Totals (chiếm khoảng $3.7\%$ quy mô toàn bộ dataset, tập trung chủ yếu ở US với 269 cặp, VN 88 cặp, KR 49 cặp).
+     * Ngoài ra, có **$5.3\%$** số cặp có tổng lượt nghe (streams) tính từ các tuần nhỏ hơn $90\%$ so với tổng streams trên trang Totals.
+   * **Tình trạng xử lý:** Nhóm **chưa thực hiện vá dữ liệu** tại đợt nộp này nhằm bảo vệ tính toàn vẹn (tránh nguy cơ lệch quy ước ngày, lệch rank hoặc vi phạm điều khoản nguồn bên thứ ba). Thay vào đó, nhóm khuyến nghị Member 4 gắn cờ phân tích độ nhạy (Sensitivity Analysis) đối với nhóm 406 cặp này.
+   * **Hệ quả nghiên cứu:** Chỉ số `ChartScore` và `weeks_on_chart` của khoảng $6\%$ số cặp (tập trung nhiều nhất ở US) hiện đang được tính toán từ một chuỗi tuần chưa hoàn toàn đầy đủ. Vấn đề thiếu hụt dữ liệu do đó không chỉ nằm ở $7.086$ cặp bị thiếu toàn bộ, mà còn xuất hiện cục bộ bên trong các cặp đã có.  
+   *(Lưu ý phương pháp luận: Đây là mức ước lượng thô ban đầu vì mốc "tuần đầu sau 2021-03-01" chỉ là tiêu chí gần đúng cho việc bài hát phát hành trong cửa sổ nghiên cứu).*
+4. **Cửa sổ Thời gian 2021–2026:** Các ca khúc ra mắt trước năm 2021 chỉ được tính các tuần thực sự xuất hiện trên BXH trong giai đoạn từ `2021-01-01` đến `2026-09-17`.
+5. **Nguyên tắc Phương pháp luận:** Mọi diễn giải trong báo cáo chỉ dừng lại ở **mối liên hệ thống kê (Association)**, không suy diễn quan hệ nhân quả (**Causation**).
 
-### 7.2. Hướng dẫn Tái lập Kết quả (Reproducibility Protocol):
-Tất cả biểu đồ và dữ liệu phân tích có thể được tái tạo lại 100% bằng chuỗi lệnh độc lập:
+### 7.2. Kết quả Phép thử Mẫu Kiểm toán 96 Cặp & Lộ trình trước Checkpoint 3 (29/10):
+1. **Kết quả Phép thử Mẫu Phân tầng 96 Cặp (Audit Sample):**
+   * Nhóm đã triển khai kiểm toán tự động kết hợp bóc tách trực tiếp mã nguồn HTML từ máy chủ Kworb cho toàn bộ $96$ cặp mẫu đại diện (nguồn: [`missing_pairs_sample.csv`](file:///D:/missing_pairs_sample.csv)). Kết quả phân loại thực nghiệm và ước lượng tổng thể:
+     * **Loại A (Out-chart trước 2021 hợp lệ):** **$87 / 96$ cặp** (ước lượng khoảng **$96\%$** trên $7.086$ cặp thiếu; riêng nhóm Top 10 chiếm khoảng **$91\%$**). Toàn bộ 87 cặp này đều có số tuần trước 2021 khớp chính xác với `lifetime_wks` trong Totals. Sau ngày `2021-01-01`, toàn bộ các tuần đều là dấu gạch ngang (`--`). Ca khúc *Hold On, We're Going Home* (Drake) có 3 tuần có điểm rơi vào tháng 10/2026 (sau mốc snapshot `2026-09-17`), do đó trong phạm vi cửa sổ nghiên cứu bài này thuộc diện out-chart hợp lệ. Phần lớn nghi ngờ về lỗi cào dữ liệu trên diện rộng đã được làm sáng tỏ (ước lượng khoảng $92\% - 100\%$). Việc loại bỏ nhóm này là hoàn toàn tuân thủ **Quy tắc 3**.
+     * **Loại D (Đứt đoạn timeline nguồn Kworb):** **$2 / 96$ cặp** (ước lượng khoảng **$2\% - 3\%$**, tương đương ~150–230 cặp; riêng nhóm Top 10 chiếm khoảng **$6\%$**). Bảng tuần của Kworb bị nhảy cóc nhiều năm giữa chừng làm mất chuỗi tuần (như *Someone You Loved* của Lewis Capaldi, *High Hopes* của Panic! At The Disco).
+     * **Loại B (Kworb thiếu cột thị trường):** **$6 / 96$ cặp** (ước lượng khoảng **$1\%$**, tương đương ~58 cặp; riêng nhóm Top 10 chiếm khoảng **$3\%$**). Bảng tuần của Kworb không tạo cột thị trường (ví dụ: *I'm Good (Blue)* thiếu cột US; *Not Like Us*, *Cool for the Summer*, *A Sky Full of Stars* thiếu cột KR).
+     * **Loại C (Bỏ sót do cơ chế tải trang của crawler):** Duy nhất **$1 / 96$ cặp** đối với ca khúc *Victoria’s Secret* (Jax: trên Kworb có 2 tuần tại KR vào các ngày `2022-08-25` hạng 165, `2022-09-01` hạng 181, cùng 8 tuần tại US; lỗi này làm mất cả bài). Script cào không phân biệt bài không có tuần nào với trang bị lỗi tải. Do quy mô mẫu nhỏ, tỷ lệ bỏ sót thực chưa xác định chắc chắn; khoảng tin cậy 95% chính xác (Clopper–Pearson) là khoảng **$0.03\%–5.7\%$** số cặp thiếu (tương đương khoảng $2$ đến $400$ cặp). Ở nhóm Top 10, không phát hiện ca nào trong 46 cặp mẫu, nhưng chưa thể loại trừ khả năng tồn tại một tỷ lệ vài phần trăm (giới hạn trên khoảng $6.3\%$).
+   * **Kết luận đúc kết giới hạn:**  
+     > *"Kiểm tra mẫu 96 cặp cho thấy khoảng 96% cặp có trong tổng hợp Kworb nhưng không có trong chart_weekly là bài đã out chart trước 2021. Phần còn lại chủ yếu do khoảng trống trên bảng tuần của Kworb (khoảng 4%). Script cào không phân biệt bài không có tuần nào với trang bị lỗi tải. Mẫu kiểm tra 96 cặp phát hiện 1 ca (Jax, mất cả US và KR). Do mẫu nhỏ, tỷ lệ bỏ sót thực chưa xác định chắc chắn; khoảng tin cậy 95% là khoảng 0,03–5,7% số cặp thiếu. Nhóm đánh dấu và kiểm tra độ nhạy của mô hình. Dữ liệu chốt ngày 17/09/2026."*
 
-```bash
-# 1. Di chuyển vào thư mục dự án
-cd music-chart-performance-analysis
-
-# 2. Chạy pipeline EDA & Trực quan hóa (tự động đọc dữ liệu chuẩn, tính toán và xuất hình 300 DPI)
-python src/chart/plot_chart_visualization.py
-
-# Kết quả sinh ra:
-# - Ảnh 300 DPI: reports/report4/figures/member1/*.png
-# - Dữ liệu bảng biểu tái lập: reports/report4/chart_data/member1/*.csv
-```
+2. **Kế hoạch Bàn giao & Cảnh báo Sớm cho Member 4 (Leader):**
+   * Thông báo trước với Member 4 về hai nội dung trọng yếu trước hạn 29/10:
+     * Tách bạch rõ hai hiện tượng: (1) Các cặp thiếu hoàn toàn gần như $96\%$ là hợp lệ, không cần crawl lại; (2) Các cặp đã có nhưng mất tuần ($406$ cặp mất $\ge 10$ tuần) nhiều khả năng là một trong những nguyên nhân chính đóng góp vào khoảng trống Top 10 ở giai đoạn 2023–2025.
+     * Khuyến nghị Member 4 bổ sung cờ `has_missing_weeks` cho 406 cặp này để chạy phân tích độ nhạy (Sensitivity Analysis), so sánh kết quả giữa mô hình đầy đủ và mô hình loại trừ các cặp thiếu tuần.
+   * Toàn bộ dữ liệu kiểm toán 96 cặp đã được hoàn thiện minh bạch tại file [`missing_pairs_sample.csv`](file:///D:/missing_pairs_sample.csv). Pipeline đã sẵn sàng tái lập các biểu đồ và bảng CSV khi nhóm thống nhất phương án xử lý tiếp theo.
