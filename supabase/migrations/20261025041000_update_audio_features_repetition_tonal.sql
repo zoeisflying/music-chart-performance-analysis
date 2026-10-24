@@ -1,5 +1,5 @@
--- Migration: Add standardized RQA repetition features, key confidence, and analyzed duration
--- to public.audio_features, and update the public.modeling_dataset view.
+-- Migration: Add standardized RQA repetition features, key confidence, and analyzed duration;
+-- drop obsolete self_similarity column; and update the public.modeling_dataset view.
 
 BEGIN;
 
@@ -14,7 +14,11 @@ ALTER TABLE public.audio_features
     ADD COLUMN IF NOT EXISTS key_confidence DOUBLE PRECISION,
     ADD COLUMN IF NOT EXISTS duration_analyzed_seconds DOUBLE PRECISION;
 
--- 2) Add documentation comments
+-- 2) Drop obsolete self_similarity column (superseded by RQA repetition features)
+ALTER TABLE public.audio_features
+    DROP COLUMN IF EXISTS self_similarity;
+
+-- 3) Add documentation comments
 COMMENT ON COLUMN public.audio_features.chroma_repetition_determinism IS
     'Fraction of recurrence points in diagonal lines (>= 3s) from 12-dim pitch-class chroma (harmonic repetition).';
 
@@ -39,7 +43,7 @@ COMMENT ON COLUMN public.audio_features.key_confidence IS
 COMMENT ON COLUMN public.audio_features.duration_analyzed_seconds IS
     'Exact duration in seconds of the audio waveform analyzed during feature extraction.';
 
--- 3) Recreate public.modeling_dataset view with all new features included
+-- 4) Recreate public.modeling_dataset view with all new features included (without self_similarity)
 DROP VIEW IF EXISTS public.modeling_dataset;
 
 CREATE VIEW public.modeling_dataset AS
@@ -74,7 +78,6 @@ SELECT
     af.mode AS audio_mode,
     af.key_confidence,
     af.chord_change_rate,
-    af.self_similarity,
     af.chroma_repetition_determinism,
     af.chroma_mean_pattern_duration,
     af.chroma_longest_pattern_duration,

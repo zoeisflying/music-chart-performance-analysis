@@ -7,7 +7,6 @@ Input files in data/processed/:
 - audio_rhythm_features.csv
 - audio_energy_features.csv
 - audio_spectral_features.csv
-- audio_self_similarity_features_merged.csv
 - audio_tonal_features.csv
 - audio_repetition_features.csv
 
@@ -68,7 +67,7 @@ def fetch_youtube_mappings() -> dict[str, int]:
 
 
 def main():
-    print("Building audio_features_master.csv...")
+    print("Building audio_features_master.csv without self_similarity...")
 
     # 1. Load duration reference
     df_duration = pd.read_csv(PROCESSED_DIR / "audio_duration_reference.csv")
@@ -86,15 +85,11 @@ def main():
     df_spectral = pd.read_csv(PROCESSED_DIR / "audio_spectral_features.csv")
     print(f"Loaded spectral: {len(df_spectral)} rows")
 
-    # 5. Load self_similarity (legacy)
-    df_ss = pd.read_csv(PROCESSED_DIR / "audio_self_similarity_features_merged.csv")
-    print(f"Loaded self_similarity: {len(df_ss)} rows")
-
-    # 6. Load tonal features (key, mode, confidence, chord change rate)
+    # 5. Load tonal features (key, mode, confidence, chord change rate)
     df_tonal = pd.read_csv(PROCESSED_DIR / "audio_tonal_features.csv")
     print(f"Loaded tonal: {len(df_tonal)} rows")
 
-    # 7. Load repetition features (RQA)
+    # 6. Load repetition features (RQA)
     df_rep = pd.read_csv(PROCESSED_DIR / "audio_repetition_features.csv")
     print(f"Loaded repetition: {len(df_rep)} rows")
 
@@ -102,7 +97,6 @@ def main():
     master = df_duration.merge(df_rhythm, on="spotify_track_id", how="inner")
     master = master.merge(df_energy, on="spotify_track_id", how="inner")
     master = master.merge(df_spectral, on="spotify_track_id", how="inner")
-    master = master.merge(df_ss, on="spotify_track_id", how="inner")
     master = master.merge(df_tonal, on="spotify_track_id", how="inner")
     master = master.merge(df_rep, on="spotify_track_id", how="inner")
 
@@ -125,7 +119,7 @@ def main():
     master["audio_status"] = "success"
     master["audio_error"] = None
 
-    # Align columns to Supabase schema order
+    # Align columns to Supabase schema order (without self_similarity)
     ordered_columns = [
         "spotify_track_id",
         "youtube_mapping_id",
@@ -153,8 +147,7 @@ def main():
         "mode",
         "key_confidence",
         "chord_change_rate",
-        # Repetition (legacy & RQA)
-        "self_similarity",
+        # Repetition (RQA standardized)
         "chroma_repetition_determinism",
         "chroma_mean_pattern_duration",
         "chroma_longest_pattern_duration",
@@ -171,6 +164,7 @@ def main():
     # QA checks
     assert len(master) == 1912, f"Expected 1912 rows, got {len(master)}"
     assert master["spotify_track_id"].nunique() == 1912, "Duplicate IDs detected!"
+    assert "self_similarity" not in master.columns, "self_similarity should be dropped!"
     
     # Save master file
     OUTPUT_FILE.parent.mkdir(parents=True, exist_ok=True)
