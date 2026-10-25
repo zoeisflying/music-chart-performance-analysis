@@ -1,0 +1,17 @@
+node_modules/
+.env
+.env.*
+!.env.example
+
+__pycache__/
+*.pyc
+
+.DS_Store
+.vscode/
+
+# Raw audio files (ignored due to size limits)
+data/raw/audio/*.wav
+data/raw/audio/*.mp3
+
+# Processed audio feature datasets (stored in Supabase, not git)
+data/processed/audio_*.csv

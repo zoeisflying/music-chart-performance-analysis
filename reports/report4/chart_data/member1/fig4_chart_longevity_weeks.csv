@@ -1,0 +1,22 @@
+market,tenure_bracket,song_count,share_pct
+KR,1 week (One-week entry),1033,27.31
+KR,2-4 weeks (<1 month),1059,27.99
+KR,5-12 weeks (1-3 months),659,17.42
+KR,13-25 weeks (1-2 quarters),427,11.29
+KR,26-51 weeks (0.5-1 year),309,8.17
+KR,52-103 weeks (1-2 years),215,5.68
+KR,104+ weeks (2+ years / perennial hit),81,2.14
+US,1 week (One-week entry),1540,34.53
+US,2-4 weeks (<1 month),1138,25.52
+US,5-12 weeks (1-3 months),744,16.68
+US,13-25 weeks (1-2 quarters),474,10.63
+US,26-51 weeks (0.5-1 year),364,8.16
+US,52-103 weeks (1-2 years),153,3.43
+US,104+ weeks (2+ years / perennial hit),47,1.05
+VN,1 week (One-week entry),571,21.6
+VN,2-4 weeks (<1 month),658,24.89
+VN,5-12 weeks (1-3 months),524,19.82
+VN,13-25 weeks (1-2 quarters),318,12.03
+VN,26-51 weeks (0.5-1 year),266,10.06
+VN,52-103 weeks (1-2 years),173,6.54
+VN,104+ weeks (2+ years / perennial hit),134,5.07

@@ -1,0 +1,69 @@
+﻿market,domain,feature,total_observations,missing_count,missing_percentage,nature_of_missingness
+VN,Chart Performance,chart_score,885,0,0.0,Complete (0% missing)
+VN,Chart Performance,lifetime_average_rank,885,0,0.0,Complete (0% missing)
+VN,Metadata,release_year,885,0,0.0,Complete (0% missing)
+VN,Audio,tempo_bpm,885,0,0.0,Complete (0% missing)
+VN,Audio,rms_energy,885,0,0.0,Complete (0% missing)
+VN,Audio,spectral_centroid,885,0,0.0,Complete (0% missing)
+VN,Audio,chord_change_rate,885,0,0.0,Complete (0% missing)
+VN,Audio,mfcc_repetition_determinism,885,0,0.0,Complete (0% missing)
+VN,Lyrics,word_count,885,1,0.11,Unretrievable raw lyrics
+VN,Lyrics,lexical_diversity,885,1,0.11,Unretrievable raw lyrics
+VN,Lyrics,repetition_ratio,885,1,0.11,Unretrievable raw lyrics
+VN,Lyrics,avg_word_length,885,1,0.11,Unretrievable raw lyrics
+VN,Lyrics,line_count,885,1,0.11,Unretrievable raw lyrics
+VN,Lyrics,chorus_repetition_count,885,354,40.0,Chorus not measurable / absent
+VN,Lyrics,title_word_in_lyrics,885,0,0.0,Complete (0% missing)
+VN,Lyrics,punctuation_ratio,885,1,0.11,Unretrievable raw lyrics
+VN,Lyrics,pronoun_ratio,885,1,0.11,Unretrievable raw lyrics
+US,Chart Performance,chart_score,955,0,0.0,Complete (0% missing)
+US,Chart Performance,lifetime_average_rank,955,0,0.0,Complete (0% missing)
+US,Metadata,release_year,955,0,0.0,Complete (0% missing)
+US,Audio,tempo_bpm,955,0,0.0,Complete (0% missing)
+US,Audio,rms_energy,955,0,0.0,Complete (0% missing)
+US,Audio,spectral_centroid,955,0,0.0,Complete (0% missing)
+US,Audio,chord_change_rate,955,0,0.0,Complete (0% missing)
+US,Audio,mfcc_repetition_determinism,955,0,0.0,Complete (0% missing)
+US,Lyrics,word_count,955,0,0.0,Complete (0% missing)
+US,Lyrics,lexical_diversity,955,0,0.0,Complete (0% missing)
+US,Lyrics,repetition_ratio,955,0,0.0,Complete (0% missing)
+US,Lyrics,avg_word_length,955,0,0.0,Complete (0% missing)
+US,Lyrics,line_count,955,0,0.0,Complete (0% missing)
+US,Lyrics,chorus_repetition_count,955,509,53.3,Chorus not measurable / absent
+US,Lyrics,title_word_in_lyrics,955,0,0.0,Complete (0% missing)
+US,Lyrics,punctuation_ratio,955,0,0.0,Complete (0% missing)
+US,Lyrics,pronoun_ratio,955,0,0.0,Complete (0% missing)
+KR,Chart Performance,chart_score,1020,0,0.0,Complete (0% missing)
+KR,Chart Performance,lifetime_average_rank,1020,0,0.0,Complete (0% missing)
+KR,Metadata,release_year,1020,0,0.0,Complete (0% missing)
+KR,Audio,tempo_bpm,1020,0,0.0,Complete (0% missing)
+KR,Audio,rms_energy,1020,0,0.0,Complete (0% missing)
+KR,Audio,spectral_centroid,1020,0,0.0,Complete (0% missing)
+KR,Audio,chord_change_rate,1020,0,0.0,Complete (0% missing)
+KR,Audio,mfcc_repetition_determinism,1020,0,0.0,Complete (0% missing)
+KR,Lyrics,word_count,1020,3,0.29,Unretrievable raw lyrics
+KR,Lyrics,lexical_diversity,1020,3,0.29,Unretrievable raw lyrics
+KR,Lyrics,repetition_ratio,1020,3,0.29,Unretrievable raw lyrics
+KR,Lyrics,avg_word_length,1020,3,0.29,Unretrievable raw lyrics
+KR,Lyrics,line_count,1020,3,0.29,Unretrievable raw lyrics
+KR,Lyrics,chorus_repetition_count,1020,450,44.12,Chorus not measurable / absent
+KR,Lyrics,title_word_in_lyrics,1020,0,0.0,Complete (0% missing)
+KR,Lyrics,punctuation_ratio,1020,3,0.29,Unretrievable raw lyrics
+KR,Lyrics,pronoun_ratio,1020,3,0.29,Unretrievable raw lyrics
+Overall,Chart Performance,chart_score,2860,0,0.0,Complete (0% missing)
+Overall,Chart Performance,lifetime_average_rank,2860,0,0.0,Complete (0% missing)
+Overall,Metadata,release_year,2860,0,0.0,Complete (0% missing)
+Overall,Audio,tempo_bpm,2860,0,0.0,Complete (0% missing)
+Overall,Audio,rms_energy,2860,0,0.0,Complete (0% missing)
+Overall,Audio,spectral_centroid,2860,0,0.0,Complete (0% missing)
+Overall,Audio,chord_change_rate,2860,0,0.0,Complete (0% missing)
+Overall,Audio,mfcc_repetition_determinism,2860,0,0.0,Complete (0% missing)
+Overall,Lyrics,word_count,2860,4,0.14,Unretrievable raw lyrics
+Overall,Lyrics,lexical_diversity,2860,4,0.14,Unretrievable raw lyrics
+Overall,Lyrics,repetition_ratio,2860,4,0.14,Unretrievable raw lyrics
+Overall,Lyrics,avg_word_length,2860,4,0.14,Unretrievable raw lyrics
+Overall,Lyrics,line_count,2860,4,0.14,Unretrievable raw lyrics
+Overall,Lyrics,chorus_repetition_count,2860,1313,45.91,Chorus not measurable / absent
+Overall,Lyrics,title_word_in_lyrics,2860,0,0.0,Complete (0% missing)
+Overall,Lyrics,punctuation_ratio,2860,4,0.14,Unretrievable raw lyrics
+Overall,Lyrics,pronoun_ratio,2860,4,0.14,Unretrievable raw lyrics

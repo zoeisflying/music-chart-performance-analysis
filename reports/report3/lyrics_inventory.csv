@@ -1,0 +1,5 @@
+﻿market,total_chart_entries,unique_tracks,lyrics_success,lyrics_not_found,success_rate_pct,mean_word_count,mean_lexical_diversity
+KR,693,693,691,2,99.71,328.7,0.4221
+US,797,797,797,0,100.0,425.2,0.356
+VN,608,608,607,1,99.84,451.0,0.3685
+Overall,2098,1912,2095,3,99.86,400.9,0.3814

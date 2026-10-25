@@ -1,0 +1,5 @@
+﻿spotify_track_id,market,title,artist,release_year,lyrics_status,has_audio,has_lyrics,reason_for_exclusion,impact_on_analysis
+7M30L99pePlQ3wh8IxVUsD,KR,With You - Instrumental,Jimin,2022,not_found,True,False,Lyrics not found in LRCLIB / online repositories (unretrievable raw text),Excluded from complete-case multimodal modeling; retained in descriptive target EDA
+1Px44tw80Q4rcCl8FxDGOi,KR,Who (Instrumental),Jimin,2024,not_found,True,False,Lyrics not found in LRCLIB / online repositories (unretrievable raw text),Excluded from complete-case multimodal modeling; retained in descriptive target EDA
+6WY4wvlmgccWapnIg14Vy0,KR,Merry Christmas Mr. Lawrence,Ryuichi Sakamoto,1996,not_found,True,False,Lyrics not found in LRCLIB / online repositories (unretrievable raw text),Excluded from complete-case multimodal modeling; retained in descriptive target EDA
+7M30L99pePlQ3wh8IxVUsD,VN,With You - Instrumental,Jimin,2022,not_found,True,False,Lyrics not found in LRCLIB / online repositories (unretrievable raw text),Excluded from complete-case multimodal modeling; retained in descriptive target EDA

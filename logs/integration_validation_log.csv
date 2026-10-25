@@ -1,0 +1,25 @@
+﻿check_name,scope,status,actual_value,expected_value,audit_note
+sampled_row_count,analysis_dataset_sampled,PASS,2860,2860,"Matches sampled chart entries (KR: 1020, US: 955, VN: 885)"
+complete_row_count,analysis_dataset_complete,PASS,2856,2856,2860 - 4 excluded instrumental/missing lyrics records
+excluded_row_count,excluded_records,PASS,4,4,Exact 4 unretrievable lyrics tracks (all instrumental tracks)
+primary_key_uniqueness_sampled,analysis_dataset_sampled,PASS,0,0,"No duplicate (spotify_track_id, market) in sampled dataset"
+primary_key_uniqueness_complete,analysis_dataset_complete,PASS,0,0,"No duplicate (spotify_track_id, market) in complete dataset"
+unique_tracks_count,analysis_dataset_sampled,PASS,1912,1912,"Matches exact study sample size of 1,912 tracks"
+market_domain_validity,analysis_dataset_sampled,PASS,"['KR', 'US', 'VN']","['KR', 'US', 'VN']","Markets strictly in VN, US, KR"
+chart_score_formula_exact,chart_performance,PASS,0.0,< 1e-6,chart_score = 101 - lifetime_average_rank holds across all rows
+peak_rank_range,chart_performance,PASS,"min=1, max=200","[1, 200]",Peak rank within weekly Top 200 boundary
+weeks_on_chart_positive,chart_performance,PASS,min=1,>= 1,Every charting song has at least 1 charting week
+weeks_in_top10_le_weeks_on_chart,chart_performance,PASS,Valid,True,weeks_in_top10 is non-negative and <= weeks_on_chart
+release_year_range,songs,FAIL,"min=1942, max=2026","[1950, 2026]",Release year parsed from release_date (vintage control)
+audio_features_missing_count,audio_features,PASS,0,0,"Audio features are 100% complete across all 2,860 entries"
+tempo_bpm_range,audio_features,PASS,"min=58.7, max=234.9","[40, 260]",Valid BPM tempo range
+rms_energy_positive,audio_features,PASS,min=0.0209,> 0,RMS energy strictly positive physical signal
+spectral_centroid_range,audio_features,PASS,"min=544.3, max=3627.8","[400, 5000]",Spectral brightness centroid within human audible range
+rqa_chroma_det_range,audio_features,PASS,"min=0.0000, max=0.9286","[0, 1]","Recurrence determinism ratio bounded in [0, 1]"
+youtube_mapping_is_selected,youtube_mapping,PASS,All True,True,All audio features originate from verified selected YouTube candidates
+complete_word_count_positive,lyrics_features,PASS,min=12.0,> 0,All complete case lyrics have word_count > 0
+complete_lexical_diversity_range,lyrics_features,PASS,"min=0.0775, max=1.0000","(0, 1]","Type-token ratio bounded within (0, 1]"
+complete_repetition_ratio_formula,lyrics_features,PASS,Valid,True,repetition_ratio = 1 - lexical_diversity strictly maintained
+complete_punctuation_ratio_range,lyrics_features,PASS,"min=0.0000, max=0.1753","[0, 0.5]",Punctuation ratio within normal range
+complete_pronoun_ratio_range,lyrics_features,PASS,"min=0.0000, max=0.3728","[0, 0.5]","Pronoun ratio bounded in [0, 0.5]"
+no_zero_imputation_policy,data_preparation,PASS,All NaN,NaN,Unretrievable lyrics are NOT arbitrarily imputed with 0; preserved as missing
