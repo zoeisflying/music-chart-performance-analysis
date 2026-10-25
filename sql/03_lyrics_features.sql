@@ -1,38 +1,43 @@
--- 03_lyrics_features.sql
--- Owner: Member 3 (Report 3)
--- Grain: 1 row = 1 spotify_track_id (Track-level grain)
--- Re-runnable: idempotent create and upsert
+-- ============================================================================
+-- SQL Schema Migration: 03_lyrics_features.sql
+-- Project: music-chart-performance-analysis (Member 3)
+-- Compatible with: supabase/migrations/20260926090000_create_lyrics_features.sql
+-- ============================================================================
+-- Notes:
+-- 1. Non-destructive migration: uses CREATE TABLE IF NOT EXISTS so existing
+--    production tables and foreign key relationships are preserved.
+-- 2. Primary key & foreign key: spotify_track_id references songs(spotify_track_id),
+--    preventing duplicate rows on re-runs via ON CONFLICT (spotify_track_id) DO UPDATE.
+-- 3. Nullable feature columns: unmeasurable or unavailable features are stored
+--    as NULL (never coerced to 0).
+-- ============================================================================
 
 CREATE TABLE IF NOT EXISTS public.lyrics_features (
-    spotify_track_id        TEXT PRIMARY KEY REFERENCES public.songs(spotify_track_id) ON DELETE CASCADE,
-    word_count              INTEGER,
-    unique_word_count       INTEGER,
-    lexical_diversity       DOUBLE PRECISION,
-    repetition_ratio        DOUBLE PRECISION,
-    avg_word_length         DOUBLE PRECISION,
-    line_count              INTEGER,
-    chorus_repetition_count DOUBLE PRECISION,
-    title_word_in_lyrics    BOOLEAN,
-    punctuation_ratio       DOUBLE PRECISION,
-    pronoun_ratio           DOUBLE PRECISION,
-    language                TEXT,
-    lyrics_status           TEXT NOT NULL DEFAULT 'pending' CHECK (lyrics_status IN ('pending', 'success', 'not_found', 'failed', 'rejected')),
-    created_at              TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at              TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    spotify_track_id TEXT PRIMARY KEY
+        REFERENCES public.songs(spotify_track_id),
+
+    word_count INTEGER,
+    unique_word_count INTEGER,
+    lexical_diversity DOUBLE PRECISION,
+    repetition_ratio DOUBLE PRECISION,
+    avg_word_length DOUBLE PRECISION,
+    line_count INTEGER,
+    chorus_repetition_count INTEGER,
+    title_word_in_lyrics BOOLEAN,
+    punctuation_ratio DOUBLE PRECISION,
+    pronoun_ratio DOUBLE PRECISION,
+
+    language TEXT,
+    lyrics_status TEXT
 );
 
-CREATE INDEX IF NOT EXISTS idx_lyrics_features_status ON public.lyrics_features(lyrics_status);
-CREATE INDEX IF NOT EXISTS idx_lyrics_features_language ON public.lyrics_features(language);
-
-COMMENT ON TABLE public.lyrics_features IS 'Linguistic and NLP features extracted from cleaned song lyrics.';
-COMMENT ON COLUMN public.lyrics_features.word_count IS 'Total recognized word tokens in cleaned lyrics.';
-COMMENT ON COLUMN public.lyrics_features.unique_word_count IS 'Count of distinct normalized word tokens.';
-COMMENT ON COLUMN public.lyrics_features.lexical_diversity IS 'Type-token ratio: unique_word_count / word_count. Undefined (NULL) if word_count = 0.';
-COMMENT ON COLUMN public.lyrics_features.repetition_ratio IS 'Repetition fraction: 1.0 - lexical_diversity.';
-COMMENT ON COLUMN public.lyrics_features.avg_word_length IS 'Mean character count per word token.';
-COMMENT ON COLUMN public.lyrics_features.line_count IS 'Number of non-empty lyric lines.';
-COMMENT ON COLUMN public.lyrics_features.chorus_repetition_count IS 'Number of times detected chorus is repeated; NULL if not identifiable.';
-COMMENT ON COLUMN public.lyrics_features.title_word_in_lyrics IS 'True if at least one content title word appears in lyrics.';
-COMMENT ON COLUMN public.lyrics_features.punctuation_ratio IS 'Punctuation characters divided by total characters.';
-COMMENT ON COLUMN public.lyrics_features.pronoun_ratio IS 'Pronoun tokens divided by word_count using language dictionaries.';
-COMMENT ON COLUMN public.lyrics_features.lyrics_status IS 'Processing status: success, not_found, failed, etc.';
+COMMENT ON TABLE public.lyrics_features IS
+    'Track-level lyrics features extracted by Member 3 pipeline (1 row per unique sampled spotify_track_id).';
+COMMENT ON COLUMN public.lyrics_features.spotify_track_id IS
+    'Primary key and foreign key to public.songs(spotify_track_id).';
+COMMENT ON COLUMN public.lyrics_features.chorus_repetition_count IS
+    'Additional occurrences of the identified chorus block (>= 0 when identified, NULL when chorus cannot be reliably identified).';
+COMMENT ON COLUMN public.lyrics_features.title_word_in_lyrics IS
+    'TRUE/FALSE whether at least one non-stopword alphabetic title token appears in lyrics; NULL when unmeasurable.';
+COMMENT ON COLUMN public.lyrics_features.pronoun_ratio IS
+    'Matched pronoun token positions divided by word_count for supported single languages (en, vi, ko, es); NULL for mixed/other/unavailable.';
