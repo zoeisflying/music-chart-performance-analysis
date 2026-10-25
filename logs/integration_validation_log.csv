@@ -1,0 +1,13 @@
+timestamp,test_suite,test_name,status,details
+2026-10-25T18:49:30.933086+00:00,File Check,modeling_dataset_exists,PASS,"Loaded C:\Users\Laptop\ADY201m-main\data\processed\modeling_dataset.csv successfully (2,860 rows)"
+2026-10-25T18:49:30.936007+00:00,Integrity,primary_key_uniqueness,PASS,"Duplicate count on (spotify_track_id, market): 0"
+2026-10-25T18:49:30.936053+00:00,Cardinality,total_records_count,PASS,"Total entries: 2,860 (expected 2,860)"
+2026-10-25T18:49:30.940358+00:00,Cardinality,market_distribution,PASS,"Market distribution: {'KR': 1020, 'US': 955, 'VN': 885} (expected {'KR': 1020, 'US': 955, 'VN': 885})"
+2026-10-25T18:49:30.940886+00:00,Cardinality,unique_tracks_count,PASS,"Unique tracks: 1,912 (expected 1,912)"
+2026-10-25T18:49:30.941336+00:00,Target Engineering,chart_score_formula,PASS,Max absolute discrepancy with 101 - avg_rank: 0.000000
+2026-10-25T18:49:30.943256+00:00,Audio Feature Quality,audio_completeness_100pct,PASS,Total NULLs across 20 audio features: 0 (expected 0)
+2026-10-25T18:49:30.943399+00:00,Lyrics Feature Quality,instrumental_missing_count,PASS,Word count NULL entries: 4 (expected 4 instrumental entries)
+2026-10-25T18:49:30.943614+00:00,Lyrics Feature Quality,chorus_null_preservation,PASS,Preserved 217 unmeasurable chorus as NULL (never coerced to 0)
+2026-10-25T18:49:30.943625+00:00,Lyrics Feature Quality,pronoun_null_preservation,PASS,Preserved 291 unsupported/mixed language pronouns as NULL (never coerced to 0)
+2026-10-25T18:49:30.945482+00:00,Domain Constraints,numerical_range_bounds,PASS,All numeric variables within theoretical bounds
+2026-10-25T18:49:30.948634+00:00,Metadata Integrity,release_year_independence,PASS,Found 339 catalog records with release_year < 2020 correctly distinguished from sampling window
