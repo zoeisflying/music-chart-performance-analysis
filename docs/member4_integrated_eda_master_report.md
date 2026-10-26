@@ -95,6 +95,9 @@ Script kiểm định tự động `src/integration/validate_analysis_dataset.py
 5. **Đóng gói 2 tập dữ liệu phục vụ nghiên cứu:**
    * Tập Master đầy đủ: [`data/processed/modeling_dataset.csv`](file:///c:/Users/Laptop/ADY201m-main/data/processed/modeling_dataset.csv) ($N = 2.860$).
    * Tập Complete-Case: [`data/processed/modeling_dataset_complete_case.csv`](file:///c:/Users/Laptop/ADY201m-main/data/processed/modeling_dataset_complete_case.csv) ($N = 2.332$, đã loại bỏ các dòng có biến ca từ NULL để làm bài test kiểm tra độ nhạy sensitivity test).
+6. **Minh chứng Kiểm toán Dữ liệu Ngoài Mẫu (`missing_pairs_sample.csv` — 96 cặp mẫu):**
+   * Đối với tổng thể $7.086$ bài hát nằm ngoài mẫu phân tầng 23 quý, Member 4 lưu trữ file mẫu 96 cặp phục vụ làm **Phụ lục Kiểm toán (Audit Proof / Appendix)**.
+   * **Nguyên tắc phương pháp luận:** Member 4 **TUYỆT ĐỐI KHÔNG sử dụng file này để huấn luyện mô hình** nhằm tránh nguy cơ sai lệch chọn mẫu (Selection Bias) và làm hỏng tính đại diện của phân khúc Hit Songs.
 
 ---
 
