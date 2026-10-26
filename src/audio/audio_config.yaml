@@ -5,9 +5,8 @@ audio_pipeline:
   sample_rate: 44100
   mono: true
   analysis_window:
-    start_second: 30.0
-    duration_seconds: 60.0
-    strategy: "representative_chorus_window"
+    strategy: "full_track"
+    description: "Phân tích toàn bộ thời lượng bài hát (trung bình ~207 giây) để nắm bắt đầy đủ cấu trúc từ Intro, Verse, Chorus đến Outro"
 
 features:
   rhythm:
