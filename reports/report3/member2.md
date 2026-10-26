@@ -9,7 +9,7 @@
 ## 1. Tổng quan Nghiên cứu & Phạm vi Trích xuất
 Báo cáo này kiểm định toàn bộ tập dữ liệu đặc trưng âm học được trích xuất từ âm thanh chuẩn hóa (44.1 kHz, mono) của các bài hát lọt vào bảng xếp hạng âm nhạc tại 3 thị trường: **Việt Nam (VN)**, **Hoa Kỳ (US)**, và **Hàn Quốc (KR)** giai đoạn 2021–2026.
 
-Dữ liệu âm thanh được phân tích tập trung vào đoạn đại diện ổn định (representative 60-second window từ giây thứ 30 đến 90), nhằm loại bỏ hiệu ứng fade-in / fade-out và thu được đặc trưng hòa âm, nhịp điệu và âm sắc cốt lõi của tác phẩm.
+Dữ liệu âm thanh được phân tích trên **toàn bộ thời lượng bài hát (Full Audio Track)** với thời lượng trung bình là 207.1 giây (~3.45 phút/bài). Điều này giúp nắm bắt toàn diện sự phát triển cấu trúc tác phẩm từ Intro, Verse, Chorus, Bridge cho đến Outro, đặc biệt giúp các phép tính lặp lại cấu trúc (RQA) phản ánh chính xác chu kỳ điệp khúc trên toàn bộ ca khúc.
 
 ---
 
@@ -17,10 +17,10 @@ Dữ liệu âm thanh được phân tích tập trung vào đoạn đại diệ
 
 | Thị trường | Tổng số bản ghi BXH | Số Track duy nhất | Có Audio (has_audio) | Đầy đủ Audio & Lyrics | Thời lượng phân tích TB (s) | Tỷ lệ trích xuất thành công |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Việt Nam (VN)** | 885 | 885 | 885 | 885 | 60.0 | 100.0% |
-| **Hoa Kỳ (US)** | 955 | 955 | 955 | 955 | 60.0 | 100.0% |
-| **Hàn Quốc (KR)** | 1,020 | 1,020 | 1,020 | 1,020 | 60.0 | 100.0% |
-| **Toàn bộ (Overall)** | **2,860** | **1,912** | **2,860** | **2,860** | **60.0** | **100.0%** |
+| **Việt Nam (VN)** | 885 | 885 | 885 | 885 | 216.4 | 100.0% |
+| **Hoa Kỳ (US)** | 955 | 955 | 955 | 955 | 202.8 | 100.0% |
+| **Hàn Quốc (KR)** | 1,020 | 1,020 | 1,020 | 1,020 | 203.1 | 100.0% |
+| **Toàn bộ (Overall)** | **2,860** | **1,912** | **2,860** | **2,860** | **207.1** | **100.0%** |
 
 *Ghi chú kiểm toán dữ liệu:*
 - Tổng số track nhạc Spotify độc bản được lấy mẫu: **1,912 tracks**.
