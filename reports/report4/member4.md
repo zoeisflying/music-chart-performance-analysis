@@ -225,23 +225,29 @@ flowchart TD
 ```
 
 ### 3.1. Trục 1: Mối quan hệ Âm học (M2) $\leftrightarrow$ Bảng xếp hạng (M1)
-1. **Năng lượng sóng âm (`rms_energy`) là động lực âm học mạnh nhất:** Có hệ số tương quan hạng Spearman thuận rõ nét nhất với `chart_score` ($r_s = 0.124, p < 0.001$). Trong kỷ nguyên streaming, các bản thu có năng lượng âm học lớn, được nén âm thanh hiện đại giúp bài hát dễ nổi bật khi phát ngẫu nhiên trên tai nghe hoặc loa điện thoại.
-2. **Tính lặp lại âm sắc (`mfcc_repetition_determinism`) củng cố thứ hạng:** Tương quan thuận có ý nghĩa ($p < 0.001$), minh chứng các ca khúc duy trì một vòng lặp beat/groove nhất quán sẽ kích thích thính giác và thúc đẩy người nghe replay nhiều lần.
-3. **Phát hiện tính phi tuyến (Non-linear Saturation):** Quan hệ này không phải là đường thẳng tuyệt đối. Đường cong LOWESS chỉ ra rằng năng lượng cao giúp tạo hit, nhưng khi vượt qua ngưỡng $0.30$, điểm số đi ngang. Nén âm quá đà (over-compression) gây mệt mỏi thính giác và không làm tăng thêm thứ hạng.
+1. **Nghịch lý Mẫu gộp Toàn cầu (Simpson's Paradox):** Trên tập mẫu gộp toàn bộ $2.860$ quan sát, tương quan đơn lẻ giữa các đặc trưng âm học với `chart_score` gần như bằng 0 (`rms_energy` $r = +0.0034$, `tempo_bpm` $r = +0.0195$, `spectral_centroid` $r = +0.0252$). Điều này là do **thị hiếu thị trường đối nghịch nhau**: Hàn Quốc chuộng năng lượng ($r = +0.0947$) trong khi Việt Nam chuộng êm dịu ($r = -0.0518$), khiến xu hướng toàn cầu tự triệt tiêu lẫn nhau.
+2. **Yếu tố Quyết định Tuổi thọ Trụ hạng (`weeks_on_chart`):**
+   - `spectral_centroid` tương quan âm rất mạnh ($r = -0.1715, p < 0.001$): Âm thanh càng chói gắt, sắc nhọn thì bài hát càng nhanh rớt bảng xếp hạng do gây cảm giác mỏi tai (auditory fatigue).
+   - `rms_energy` tương quan âm rõ nét ($r = -0.1064, p < 0.001$): Nén âm quá đà làm giảm tuổi thọ nghe lại.
+   - `dynamic_range` ($r_s = +0.0559$) tương quan thuận: Bài hát có khoảng thở tự nhiên duy trì số tuần trụ hạng tốt hơn.
+3. **Phát hiện tính phi tuyến (Non-linear Saturation qua LOWESS):** Quan hệ này không phải là đường thẳng. Đường cong LOWESS chỉ ra rằng năng lượng âm thanh chỉ hỗ trợ thăng hạng đến một ngưỡng nhất định; khi vượt qua ngưỡng $0.35$, đường xu hướng đi ngang (ngưỡng bão hòa - Diminishing Returns).
 
 ### 3.2. Trục 2: Mối quan hệ Ca từ (M3) $\leftrightarrow$ Bảng xếp hạng (M1)
-1. **Tính lặp lại ca từ (`repetition_ratio`) duy trì độ bền trụ hạng (`weeks_on_chart`):** Tương quan thuận có ý nghĩa thống kê ($p < 0.001$). Các bài hát có cấu trúc ca từ lặp lại hợp lý giúp người nghe thuộc lời nhanh hơn, tạo ra độ bền nghe lại qua nhiều tháng.
+1. **Tính lặp lại ca từ (`repetition_ratio`) duy trì độ bền trụ hạng (`weeks_on_chart`):** Tương quan thuận có ý nghĩa thống kê ($p < 0.001$, Spearman $r_s = +0.0622$). Các bài hát có cấu trúc ca từ lặp lại hợp lý giúp người nghe thuộc lời nhanh hơn, tạo ra độ bền nghe lại qua nhiều tháng.
 2. **Chiến lược "Hook Branding" xuất hiện ở $>90\%$ bài hát:** Biến `title_word_in_lyrics` đạt trên 90% ở cả 3 thị trường, chứng minh việc đưa tên bài hát vào lời bài hát là quy tắc tiếp thị âm nhạc phổ quát.
-3. **Nghịch lý dung lượng ca từ tại Mỹ (US):** Cột `word_count` có tương quan âm ($r = -0.09$) với `chart_score`. Các bài hát có ca từ quá dài dòng, thiếu điệp khúc cô đọng thường khó duy trì thứ hạng cao so với các bản hit súc tích.
+3. **Sự phân hóa thị hiếu ca từ theo quốc gia:**
+   - Tại **Việt Nam (VN)**: `word_count` tương quan thuận với thứ hạng ($r = +0.1112$) và thuận rất mạnh với tuổi thọ trụ hạng ($r = +0.2391$). Khán giả Việt Nam chuộng Pop-Ballad có ca từ dài, giàu tính kể chuyện tự sự (trụ hạng trung bình $40.66$ tuần).
+   - Tại **Hàn Quốc (KR)**: `word_count` tương quan âm với thứ hạng ($r = -0.0803$) và âm rất nặng với tuần trụ hạng ($r = -0.2301$). K-Pop chuộng ca từ ngắn gọn, hook punchy để nhảy theo.
 
 ### 3.3. Trục 3: Sự Đồng bộ Đa phương thức giữa Âm thanh (M2) $\leftrightarrow$ Ca từ (M3)
-1. **Nhạc càng sôi động thì ca từ càng tinh gọn và lặp lại:** `rms_energy` và `onset_rate` tương quan thuận với `repetition_ratio` ($r = 0.18$) và tương quan nghịch với `lexical_diversity` ($r = -0.18$). Khi tempo bài hát nhanh và mật độ nốt gõ dồn dập, ca từ buộc phải sử dụng ít từ vựng phức tạp và tăng cường các câu hook lặp lại để người nghe kịp tiếp nhận.
-2. **Vòng lặp âm thanh đồng pha với vòng lặp ngôn ngữ:** `mfcc_repetition_determinism` (lặp lại loop nhạc cụ) có tương quan thuận với `chorus_repetition_count` ($r = 0.15$). Một bản phối có cấu trúc loop tuần hoàn luôn đi kèm với một cấu trúc điệp khúc được hát lại nhiều lần.
+1. **Sự gắn kết nhịp điệu và hòa âm:** `tempo_bpm` tương quan thuận rất mạnh với `chord_change_rate` ($r = +0.6055$). Tốc độ nhịp càng nhanh thì số lần chuyển hợp âm trong 1 phút càng cao.
+2. **Quy luật độ dài và lặp lại ca từ:** `word_count` tương quan thuận mạnh với `line_count` ($r = +0.7625$) và tương quan nghịch với `lexical_diversity` ($r = -0.3359$, tương ứng thuận với `repetition_ratio` $r = +0.3359$). Đúng theo quy luật ngôn ngữ học Heaps/Zipf: bài hát càng dài thì tỷ lệ từ mới xuất hiện càng giảm và số câu từ lặp lại càng tăng.
+3. **Tương tác âm thanh - lời hát:** `onset_rate` tương quan thuận với `word_count` ($r = +0.3549$). Khi tiết tấu gõ dồn dập (Rap/Dance), lượng từ nhả chữ dày đặc hơn.
 
 ### 3.4. Yếu tố Điều tiết của Thị trường (Market Moderation: VN vs US vs KR)
-* **Hàn Quốc (KR):** Năng lượng tương quan thuận với thứ hạng ($+0.08$) $\to$ Văn hóa thần tượng K-Pop ưu tiên các bản Dance/EDM dồn dập ($201.5$ onsets/s).
-* **Việt Nam (VN):** Năng lượng tương quan âm nhẹ ($-0.05$) $\to$ Thị trường dành sự ưu ái bền bỉ cho các bản Pop-Ballad và Acoustic êm dịu tôn vinh chất giọng tự nhiên.
-* **Hoa Kỳ (US):** Lặp lại âm sắc MFCC cao nhất ($0.239$) và sử dụng đại từ nhân xưng cao nhất ($19.5\%$) $\to$ Xu hướng Hip-Hop/Pop cá nhân hóa xưng hô trực diện ("I", "You").
+* **Hàn Quốc (KR — $N = 1.020$):** `rms_energy` tương quan thuận ($r = +0.0947$), `spectral_centroid` tương quan thuận mạnh ($r = +0.1652$), `word_count` tương quan âm ($-0.0803$) $\to$ K-Pop chuộng nhạc sôi động, âm thanh sắc nét, ca từ cô đọng.
+* **Việt Nam (VN — $N = 885$):** `rms_energy` tương quan âm ($-0.0518$), `spectral_centroid` tương quan âm mạnh ($-0.1233$), `word_count` tương quan thuận ($+0.1112$) $\to$ Thị trường dành sự ưu ái bền bỉ cho các bản Pop-Ballad êm dịu, ca từ giàu chất thơ tự sự.
+* **Hoa Kỳ (US — $N = 955$):** `chord_change_rate` tương quan thuận ($+0.0526$), `repetition_ratio` duy trì trụ hạng ($+0.0811$), mật độ nốt gõ cao nhất ($199.08$ onsets/s) và dùng đại từ nhân xưng cao nhất ($19.40\%$).
 
 ---
 
@@ -249,24 +255,28 @@ flowchart TD
 
 ### 4.1. Báo cáo phân tích đa biến: [`reports/report4/integrated_analysis.md`](file:///c:/Users/Laptop/ADY201m-main/reports/report4/integrated_analysis.md)
 Tài liệu này mở rộng phạm vi từ phân tích đơn biến sang **Phân tích Tương quan Đa biến (Multivariate Integrated EDA)**:
-* Khẳng định 3 nhân tố tương quan thuận mạnh nhất với điểm số thành tích: `rms_energy`, `mfcc_repetition_determinism`, và `repetition_ratio` ($p < 0.001$).
-* Thực hiện phân tầng $2.860$ quan sát thành **3 Tiers thành tích**: Nhóm Tier 1 (Top 25% Siêu Hit) có trung vị năng lượng ($0.254$) và độ lặp groove vượt trội so với Tier 3 ($0.225$).
-* Cung cấp khuyến nghị kinh lượng học: loại bỏ `loudness_proxy` để tránh đa cộng tuyến hoàn hảo với `rms_energy`, và chuẩn bị mô hình phi tuyến.
+* Xác lập biến mục tiêu quy chuẩn: $\text{ChartScore} = 101 - \text{lifetime\_average\_rank}$.
+* Phân tầng chuẩn xác $2.860$ quan sát thành **3 Tiers thành tích** theo phân vị toán học:
+  - **Tier 1 (High Performance, Top 25%):** Score $\ge 32.93$ ($N = 715$, điểm trung bình $52.86$, median RMS = $0.2466$, Chord Rate = $43.32$, Repetition = $0.6197$).
+  - **Tier 2 (Moderate Performance, 50% ở giữa):** $-22.51 \le \text{Score} < 32.93$ ($N = 1.430$, điểm trung bình $7.80$, median RMS = $0.2493$, Chord Rate = $43.41$, Repetition = $0.6218$).
+  - **Tier 3 (Low Performance, Bottom 25%):** Score $< -22.51$ ($N = 715$, điểm trung bình $-52.61$, median RMS = $0.2433$, Chord Rate = $43.16$, Repetition = $0.6132$).
+* **Insight cốt lõi:** Các đặc trưng âm học ở 3 Tiers có sự phân bố khá đồng đều (Kruskal-Wallis $p > 0.05$ trên mẫu gộp), chứng minh không có một công thức âm học đơn nhất cho toàn cầu, vì mỗi tầng đều chứa các bài hit mang bản sắc riêng biệt của 3 nước.
+* Khuyến nghị mô hình hóa: Loại bỏ `loudness_proxy` (tương quan $> 0.95$ với `rms_energy`), loại bỏ `tempo_stability` để khử đa cộng tuyến hoàn hảo.
 
 ### 4.2. Jupyter Notebook thực nghiệm tương tác: [`notebooks/integrated_hit_song_analysis.ipynb`](file:///c:/Users/Laptop/ADY201m-main/notebooks/integrated_hit_song_analysis.ipynb)
 Notebook gồm 17 ô lệnh chạy sẵn toàn bộ mã nguồn và đồ thị 300 DPI, chia làm 4 module:
-* **Module 1 (Hình 1):** Ma trận tương quan đa biến Spearman ($r_s$) kết nối đồng thời cả biến Chart, biến Audio và biến Lyrics.
-* **Module 2 (Hình 2):** Phân tầng 3 Tiers thành tích kiểm định qua thuật toán phi tham số Kruskal-Wallis ($p < 0.001$).
-* **Module 3 (Hình 3) — Phát hiện đột phá:** Sử dụng đường cong làm mịn phi tuyến **LOWESS** (Locally Weighted Scatterplot Smoothing) chứng minh **Quy luật Bão hòa Năng lượng (Diminishing Returns)**. Điểm thành tích chỉ tăng khi năng lượng chuyển từ thấp lên trung bình-cao; khi vượt qua ngưỡng $0.30$, đường xu hướng đi ngang.
-* **Module 4 (Hình 4):** Kỹ thuật tái chọn mẫu **Bootstrap 95% CI** theo dõi xu hướng tiến hóa qua thời gian: nhịp điệu toàn cầu ổn định quanh 120 BPM, và kỹ thuật mastering của Việt Nam thu hẹp khoảng cách với thế giới từ năm 2024.
+* **Module 1 (Hình 1):** Ma trận tương quan đa biến Spearman ($r_s$) và Pearson ($r$) kết nối đồng thời cả biến Chart, Audio và Lyrics trên đủ $N = 2.860$ dòng.
+* **Module 2 (Hình 2):** Phân tầng 3 Tiers thành tích kiểm định qua thuật toán phi tham số Kruskal-Wallis trên toàn bộ tập mẫu gộp.
+* **Module 3 (Hình 3) — Phát hiện đột phá:** Sử dụng đường cong làm mịn phi tuyến **LOWESS** (Locally Weighted Scatterplot Smoothing) chứng minh **Quy luật Bão hòa Năng lượng (Diminishing Returns)**. Điểm thành tích chỉ tăng khi năng lượng chuyển từ thấp lên trung bình; khi vượt qua ngưỡng $0.35$, đường xu hướng đi ngang. Nén âm quá đà (over-compression) không làm tăng thêm thứ hạng.
+* **Module 4 (Hình 4):** Kỹ thuật tái chọn mẫu **Bootstrap 95% CI** theo dõi xu hướng tiến hóa qua thời gian: nhịp điệu toàn cầu ổn định quanh $120 - 123$ BPM, và kỹ thuật mastering của Việt Nam thu hẹp khoảng cách với thế giới từ năm 2024.
 
 ---
 
 ## PHẦN 5: BA PHÁT HIỆN KHOA HỌC THEN CHỐT & ĐỊNH HƯỚNG MÔ HÌNH HÓA (REPORT 5)
 
-1. **Quy luật Bão hòa Năng lượng (Diminishing Returns):** Năng lượng âm học cao và độ lặp lại giúp ca khúc dễ trở thành hit, nhưng tồn tại một ngưỡng bão hòa. Nén âm quá đà (over-compression) không làm tăng thêm thứ hạng.
-2. **Sự Điều tiết Bản sắc Văn hóa Thị trường:** Cùng một đặc trưng năng lượng, tại Hàn Quốc nó kích thích thứ hạng ($+0.08$), nhưng tại Việt Nam nó lại kìm hãm thứ hạng ($-0.05$).
-3. **Chiến lược Định vị Thương hiệu qua Hook Toàn cầu (Hook Branding):** Hơn $90\%$ bài hát lặp lại từ khóa tiêu đề trong ca từ, đồng pha với vòng lặp beat máy tử (MFCC).
+1. **Quy luật Bão hòa Năng lượng (Diminishing Returns):** Năng lượng âm học cao giúp ca khúc dễ cạnh tranh, nhưng tồn tại ngưỡng bão hòa rõ rệt ($> 0.35$). Nén âm quá đà (over-compression) không làm tăng thêm thứ hạng.
+2. **Sự Điều tiết Bản sắc Văn hóa Thị trường (Market Moderation):** Cùng một đặc trưng năng lượng, tại Hàn Quốc nó kích thích thứ hạng ($r = +0.0947$), nhưng tại Việt Nam nó lại làm giảm thứ hạng ($r = -0.0518$). Tương tự, độ sáng phổ cao giúp bài K-Pop thăng hạng ($r = +0.1652$) nhưng lại khiến bài hát tại Việt Nam tụt hạng ($r = -0.1233$) và nhanh rớt chart ($r = -0.3107$).
+3. **Chiến lược Định vị Thương hiệu qua Hook Toàn cầu (Hook Branding):** Hơn $90\%$ bài hát lặp lại từ khóa tiêu đề trong ca từ, giúp người nghe dễ nhận diện và thuộc lời nhanh chóng.
 
 ### Định hướng Mô hình hóa Report 5:
 * **Xử lý Đa cộng tuyến:** Loại bỏ `loudness_proxy` (tương quan $> 0.95$ với `rms_energy`).

@@ -166,14 +166,20 @@ Member 4 đã xây dựng 5 biểu đồ trực quan hóa tích hợp đa phươ
 ![Figure 1: Multimodal Correlation Matrix Overall](figures/member4/fig1_correlation_matrix_overall.png)
 
 **Phân tích phát hiện thực nghiệm ($N = 2.860$ quan sát):**
-1. **Mối tương quan tuyến tính giữa Target ChartScore và các đặc trưng đơn lẻ là rất yếu ($|r| < 0.15$):**
-   * Tương quan Pearson giữa `chart_score` với `rms_energy` ($r = 0.04$), với `tempo_bpm` ($r = 0.02$), với `spectral_centroid` ($r = 0.05$), và với `word_count` ($r = -0.06$).
-   * Điều này mang ý nghĩa phương pháp luận cực kỳ quan trọng: **Không có một "công thức ma thuật" đơn biến nào (ví dụ cứ nhạc nhanh hoặc nhạc to là thành Hit)**. Thành công thương mại trên bảng xếp hạng là kết quả tương tác phi tuyến phức hợp đa chiều giữa âm thanh, ca từ, chiến lược quảng bá và danh tiếng nghệ sĩ.
-2. **Cụm tương quan nội tại giữa các đặc trưng âm học:**
-   * `rms_energy` tương quan thuận mạnh với `onset_rate` ($r = 0.48$) và `spectral_centroid` ($r = 0.41$). Các bài hát có năng lượng lớn thường đi kèm tiết tấu dồn dập và phổ âm sáng.
-   * `mfcc_repetition_determinism` tương quan thuận với `onset_rate` ($r = 0.28$), khẳng định các bản phối có mật độ nốt cao thường lặp lại các vòng beat loop điện tử.
-3. **Cụm tương quan ca từ:**
-   * `word_count` tương quan thuận với `line_count` ($r = 0.68$) và tương quan nghịch với `lexical_diversity` ($r = -0.42$), phản ánh quy luật ngôn ngữ học tự nhiên: bài hát càng dài thì tỷ lệ từ mới xuất hiện càng giảm dần.
+1. **Mối tương quan tuyến tính giữa Target ChartScore và các đặc trưng đơn lẻ ở mức rất khiêm tốn ($|r| < 0.05$):**
+   * Tương quan Pearson gộp giữa `chart_score` với các đặc trưng âm học: `tempo_bpm` ($r = +0.0195$), `rms_energy` ($r = +0.0034$), `spectral_centroid` ($r = +0.0252$), `chord_change_rate` ($r = +0.0033$), `onset_rate` ($r = -0.0088$).
+   * Tương quan Pearson gộp giữa `chart_score` với các đặc trưng ca từ: `word_count` ($r = +0.0337$), `line_count` ($r = +0.0178$), `repetition_ratio` ($r = +0.0140$).
+   * **Bản chất hiện tượng (Simpson's Paradox):** Tương quan đơn lẻ gộp toàn cầu gần bằng 0 **không phải vì các đặc trưng không tác động**, mà do **thị hiếu giữa các quốc gia đối nghịch nhau** (Hàn Quốc chuộng năng lượng cao $r = +0.0947$ trong khi Việt Nam chuộng êm dịu $r = -0.0518$). Khi phân tích gộp mà không kiểm soát thị trường, các xu hướng đối lập tự triệt tiêu lẫn nhau.
+2. **Yếu tố quyết định độ bền bài hát (`weeks_on_chart` - Tuổi thọ trụ hạng):**
+   * `spectral_centroid` tương quan âm rất mạnh ($r = -0.1715, p < 0.001$): Âm thanh càng chói gắt, sắc nhọn thì bài hát càng nhanh rớt bảng xếp hạng do gây cảm giác mệt tai (auditory fatigue).
+   * `rms_energy` tương quan âm rõ nét ($r = -0.1064, p < 0.001$): Việc nén âm quá đà (over-compression) làm mất dải động tự nhiên, khiến bài hát khó duy trì việc nghe lại bền bỉ qua nhiều tháng.
+   * `onset_rate` tương quan âm ($r = -0.0822$): Mật độ nốt gõ quá dồn dập cản trở việc nghe thư giãn dài hạn.
+   * `dynamic_range` ($r = +0.0236$, Spearman $r_s = +0.0559$) và `repetition_ratio` ($r_s = +0.0622$): Các ca khúc giữ khoảng thở động học và có câu hook điệp khúc dễ nhớ giúp người nghe thuộc lời, tạo độ bền trụ hạng cao hơn.
+3. **Mối liên kết nội tại đa phương thức (Audio $\leftrightarrow$ Lyrics Synergy):**
+   * `tempo_bpm` và `chord_change_rate` tương quan thuận rất mạnh ($r = +0.6055$): Nhịp bài hát càng nhanh thì tốc độ chuyển hợp âm trong 1 phút càng cao.
+   * `word_count` tương quan thuận mạnh với `line_count` ($r = +0.7625$) và tương quan nghịch với `lexical_diversity` ($r = -0.3359$, tương ứng tương quan thuận với `repetition_ratio` $r = +0.3359$). Đúng theo quy luật ngôn ngữ học tự nhiên: bài hát càng dài thì tỷ lệ từ mới xuất hiện càng giảm và số câu từ lặp lại càng tăng.
+   * `onset_rate` tương quan thuận với `word_count` ($r = +0.3549$): Các bản nhạc có tiết tấu gõ dồn dập (đặc biệt là Rap/Dance) thường có lượng từ nhả chữ dày đặc hơn.
+   * `rms_energy` tương quan thuận với `spectral_centroid` ($r = +0.2895$) và `onset_rate` ($r = +0.2475$): Năng lượng sóng âm lớn thường đi kèm phổ âm sáng và tiết tấu gõ mạnh.
 
 ---
 
@@ -183,10 +189,24 @@ Member 4 đã xây dựng 5 biểu đồ trực quan hóa tích hợp đa phươ
 
 ![Figure 2: Tri-Market Faceted Correlation](figures/member4/fig2_correlation_matrix_by_market.png)
 
-**Phân tích so sánh đối chiếu cấu trúc tương quan:**
-Khi bóc tách ma trận tương quan theo từng thị trường riêng biệt (VN: $885$, US: $955$, KR: $1.020$), một số sự phân hóa đáng chú ý đã xuất hiện:
-* **Năng lượng Âm học vs Thứ hạng:** Tại **Hàn Quốc (KR)**, `rms_energy` có tương quan dương với `chart_score` ($r = +0.08$), trong khi tại **Việt Nam (VN)**, hệ số này lại mang dấu âm ($r = -0.05$). Điều này phản ánh xu hướng thị trường: K-Pop thương mại ưu tiên các ca khúc dance/performance giàu năng lượng, trong khi thị trường Việt Nam có sự đón nhận rất nồng nhiệt dành cho các bản Ballad/Acoustic êm dịu, nhẹ nhàng.
-* **Độ dài Ca từ vs Thứ hạng:** Tại **Hoa Kỳ (US)**, `word_count` có tương quan âm với `chart_score` ($r = -0.09$), ngụ ý các ca khúc có ca từ súc tích, cô đọng, dễ ghi nhớ có xu hướng đạt thứ hạng cao hơn các bản rap dày đặc chữ.
+**Phân tích so sánh đối chiếu cấu trúc tương quan giữa 3 thị trường:**
+Khi bóc tách ma trận tương quan theo từng thị trường riêng biệt (VN: $885$, US: $955$, KR: $1.020$), bức tranh thị hiếu âm nhạc thể hiện sự phân hóa sâu sắc:
+
+1. **Thị trường Việt Nam (VN — $N = 885$): Gu Thưởng thức Sâu Lắng, Mộc Mạc & Ca Từ Giàu Tự Sự**
+   * `rms_energy` tương quan âm với `chart_score` ($r = -0.0518$): Nhạc càng to, càng dồn dập thì thứ hạng càng có xu hướng giảm.
+   * `spectral_centroid` tương quan âm mạnh với `chart_score` ($r = -0.1233$) và âm cực mạnh với `weeks_on_chart` ($r = -0.3107$): Khán giả Việt Nam dị ứng với âm sắc chói gắt; các bài hát có centroid thấp (âm trầm ấm, tôn giọng hát tự nhiên) đạt thứ hạng cao và trụ hạng lâu hơn vượt trội.
+   * `onset_rate` tương quan âm với `chart_score` ($r = -0.1145$): Mật độ nốt thưa, nhịp điệu chậm rãi được đón nhận tốt hơn.
+   * `word_count` tương quan thuận với `chart_score` ($r = +0.1112$) và thuận rất mạnh với `weeks_on_chart` ($r = +0.2391$): Khán giả Việt đặc biệt yêu thích các ca khúc Pop-Ballad có ca từ dài, giàu tính kể chuyện tự sự, giúp bài hát trụ hạng trung bình lên tới $40.66$ tuần (cao nhất trong 3 nước).
+
+2. **Thị trường Hàn Quốc (KR — $N = 1.020$): Bản Sắc K-Pop Trình Diễn, Sôi Động & Hook Cô Đọng**
+   * `rms_energy` tương quan dương với `chart_score` ($r = +0.0947$): Bài hát có mức năng lượng vật lý lớn, beat mạnh mẽ hỗ trợ vũ đạo sẽ thăng hạng tốt hơn.
+   * `spectral_centroid` tương quan dương mạnh với `chart_score` ($r = +0.1652$): Độ sáng phổ cao (âm thanh sắc nét, leng keng, hiện đại) là nhân tố thúc đẩy thứ hạng hàng đầu tại K-Pop.
+   * `word_count` tương quan âm với `chart_score` ($r = -0.0803$) và âm rất nặng với `weeks_on_chart` ($r = -0.2301$): Tại Hàn Quốc, bài hát ca từ quá dài lê thê sẽ nhanh chóng rớt chart. Khán giả K-Pop chuộng ca từ cô đọng, nhiều câu hook tiếng Anh ngắn gọn, dễ nhớ để nhảy theo.
+
+3. **Thị trường Hoa Kỳ (US — $N = 955$): Đa Dạng Thể Loại & Chú Trọng Cấu Trúc Hợp Âm**
+   * `chord_change_rate` tương quan dương với `chart_score` ($r = +0.0526$): Các ca khúc có biến chuyển hợp âm phong phú đạt thứ hạng tốt.
+   * `word_count` tương quan dương nhẹ với `chart_score` ($r = +0.0632$): Thị trường đón nhận cả Hip-Hop dày chữ lẫn Pop chuẩn mực.
+   * `repetition_ratio` tương quan thuận với `weeks_on_chart` ($r = +0.0811$): Tỷ lệ lặp lại ca từ cao giúp bài hát duy trì thứ hạng nghe streaming lâu hơn qua các tuần.
 
 ---
 
@@ -234,17 +254,22 @@ Khi bóc tách ma trận tương quan theo từng thị trường riêng biệt 
 
 Dựa trên sự tổng hợp đa chiều từ cả 4 phân hệ, nhóm nghiên cứu rút ra **3 phát hiện khoa học then chốt**:
 
-### Phát hiện 1: Tính Chuẩn Hóa Công Nghệ Toàn Cầu Song Hành Với Sự Phân Hóa Năng Lượng Khu Vực (Global Technical Standardization vs Regional Kinetic Divergence)
-* **Chứng cứ thực nghiệm:** Toàn bộ 100% bản ghi trên cả 3 thị trường đều có hệ số biến thiên phách cực thấp ($CV < 0.02$) và tốc độ nhịp điệu tương đương nhau quanh mốc $120$ BPM ($p = 0.092$). Điều này minh chứng một nền tảng sản xuất âm nhạc số hóa toàn cầu đồng nhất dựa trên phần mềm DAW.
-* **Sự phân hóa khu vực:** Dù chung nền tảng công nghệ, phong cách sản xuất có sự phân cực rõ nét: **Hàn Quốc** tối đa hóa mật độ nốt ($201.5$ events/s) và độ nén âm thanh; **Hoa Kỳ** tối đa hóa tính lặp lại của loop âm sắc; trong khi **Việt Nam** giữ dải phổ mềm mại hơn nhằm tôn vinh chất giọng truyền cảm.
+### Phát hiện 1: Tính Chuẩn Hóa Công Nghệ Toàn Cầu Song Hành Với Sự Phân Hóa Thẩm Mỹ Khu Vực (Global Standardization vs Regional Aesthetic Divergence)
+* **Chứng cứ thực nghiệm:** Toàn bộ 100% bản ghi trên cả 3 thị trường đều có hệ số biến thiên phách cực thấp ($CV < 0.02$) và tốc độ nhịp điệu tương đương nhau quanh mốc $121$ BPM (VN: $120.45$, US: $122.32$, KR: $120.61$). Điều này minh chứng một nền tảng sản xuất âm nhạc số hóa toàn cầu đồng nhất dựa trên phần mềm DAW và lưới nhịp điện tử.
+* **Sự phân hóa khu vực:** Dù chung nền tảng công nghệ, thẩm mỹ âm học có sự phân cực rõ nét:
+  - **Hàn Quốc** dẫn đầu về năng lượng sóng âm (`rms_energy` trung bình $0.2540$) và độ sáng phổ (`spectral_centroid` $2335.28$ Hz), phản ánh bản sắc K-Pop vũ đạo sôi động, dồn dập.
+  - **Việt Nam** duy trì mức năng lượng mềm mại nhất (`rms_energy` $0.2237$) và độ sáng phổ thấp nhất ($2165.96$ Hz) để tôn vinh chất giọng tự nhiên và không gian trữ tình của Pop-Ballad.
+  - **Hoa Kỳ** dẫn đầu về mật độ nốt gõ (`onset_rate` $199.08$ events/s) và tỷ lệ đại từ xưng hô (`pronoun_ratio` $19.40\%$).
 
-### Phát hiện 2: Chiến Lược Định Vị Thương Hiệu Qua Hook Phổ Quát & Sự Khác Biệt Hình Thái Ca Từ (Universal Hook Branding vs Morphological Nuance)
+### Phát hiện 2: Chiến Lược Định Vị Thương Hiệu Qua Hook Phổ Quát & Sự Khác Biệt Hình Thái Ca Từ (Universal Hook Branding vs Morphological Structure)
 * **Chứng cứ thực nghiệm:** Hơn $90\%$ ca khúc ở cả 3 quốc gia đều lặp lại từ khóa tiêu đề trong lời bài hát, và khối điệp khúc trung bình được tái hiện thêm $1.6 - 1.7$ lần. Đây là chiến lược tiếp thị âm nhạc phổ quát nhằm tạo dấu ấn nhận diện tức thì trong kỷ nguyên tiêu thụ âm nhạc ngắn (TikTok, Reels).
-* **Khác biệt hình thái học:** Mức độ đa dạng từ vựng biểu kiến cao của tiếng Hàn ($TTR = 0.44$) và dung lượng token lớn của tiếng Việt phản ánh cấu trúc ngữ pháp (chắp dính vs đơn lập), cho thấy khi phân tích kinh lượng học bắt buộc phải kiểm soát hiệu ứng cố định ngôn ngữ.
+* **Khác biệt hình thái học:** Mức độ đa dạng từ vựng biểu kiến cao của tiếng Hàn ($TTR = 0.4243$) và dung lượng token lớn của tiếng Việt ($400.55$ tokens) phản ánh cấu trúc ngữ pháp (chắp dính vs đơn lập), cho thấy khi phân tích kinh lượng học bắt buộc phải kiểm soát hiệu ứng cố định ngôn ngữ.
 
-### Phát hiện 3: Nghịch Lý Tương Quan Tuyến Tính Đơn Biến & Sự Cần Thiết Của Mô Hình Đa Biến Có Hiệu Ứng Cố Định (The Univariate Paradox & Need for Fixed Effects)
-* **Chứng cứ thực nghiệm:** Hệ số tương quan tuyến tính đơn biến giữa từng đặc trưng âm học/ca từ với ChartScore đều ở mức thấp ($|r| < 0.15$).
-* **Hàm ý khoa học:** Một bài hát Hit không được tạo ra từ một đặc tính đơn lẻ. Sự thành công là hàm tương tác đa biến giữa thể loại, độ tuổi bài hát (`release_year`), danh tiếng nghệ sĩ, và hiệu ứng cố định của thị trường tiêu thụ. Điều này đặt nền móng lý thuyết vững chắc cho giai đoạn xây dựng mô hình hồi quy ở Report 5.
+### Phát hiện 3: Nghịch Lý Tương Quan Đơn Biến (Simpson's Paradox) & Yếu Tố Quyết Định Tuổi Thọ Trụ Hạng (Longevity Dynamics)
+* **Hiện tượng triệt tiêu xu hướng (Simpson's Paradox):** Tương quan đơn lẻ gộp cả 3 nước giữa `chart_score` với các đặc trưng âm học gần như bằng 0 ($|r| < 0.05$) là do **thị hiếu thị trường hoàn toàn đối nghịch**:
+  - Tại Hàn Quốc: Năng lượng âm học thuận chiều với thứ hạng ($r = +0.0947$), phổ âm càng sáng càng dễ lên hạng ($r = +0.1652$), ca từ càng dài càng bất lợi ($r = -0.0803$).
+  - Tại Việt Nam: Xu hướng đảo chiều 180 độ — Năng lượng âm học nghịch chiều với thứ hạng ($r = -0.0518$), phổ âm chói gắt làm tụt hạng ($r = -0.1233$), trong khi ca từ tự sự dài nhiều chữ lại giúp thăng hạng ($r = +0.1112$).
+* **Yếu tố duy trì độ bền bài hát (`weeks_on_chart`):** Âm thanh chói gắt (`spectral_centroid` $r = -0.1715$) và nén âm ồn ào (`rms_energy` $r = -0.1064$) làm giảm mạnh tuổi thọ bài hát do gây mỏi tai (auditory fatigue); trong khi bài hát có dải động tự nhiên và ca từ lặp lại điệp khúc giúp người nghe replay bền bỉ qua nhiều tháng. Đặc biệt tại Việt Nam, bài hát giàu chất tự sự kể chuyện giúp duy trì tuổi thọ trụ hạng lên tới trung bình $40.66$ tuần ($r = +0.2391$).
 
 ---
 
