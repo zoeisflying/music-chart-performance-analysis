@@ -1,0 +1,35 @@
+{
+    "KR": {
+        "word_count": 299.0,
+        "unique_word_count": 118.0,
+        "lexical_diversity": 0.424657534246575,
+        "repetition_ratio": 0.575342465753425,
+        "avg_word_length": 3.48924731182796,
+        "line_count": 51.0,
+        "chorus_repetition_count": 1.0,
+        "punctuation_ratio": 0.0481874447391689,
+        "pronoun_ratio": 0.1532730609747805
+    },
+    "US": {
+        "word_count": 356.0,
+        "unique_word_count": 125.0,
+        "lexical_diversity": 0.37375657580105204,
+        "repetition_ratio": 0.6262434241989481,
+        "avg_word_length": 3.8383954942781653,
+        "line_count": 49.0,
+        "chorus_repetition_count": 1.0,
+        "punctuation_ratio": 0.04524234111014735,
+        "pronoun_ratio": 0.193548387096774
+    },
+    "VN": {
+        "word_count": 401.0,
+        "unique_word_count": 151.0,
+        "lexical_diversity": 0.3710407239819,
+        "repetition_ratio": 0.6289592760181,
+        "avg_word_length": 3.34984520123839,
+        "line_count": 53.0,
+        "chorus_repetition_count": 1.0,
+        "punctuation_ratio": 0.0297060662914321,
+        "pronoun_ratio": 0.120430107526882
+    }
+}
