@@ -113,5 +113,189 @@
       "importance": 0.007319367039137959,
       "std": 0.10822537066756052
     }
+  ],
+  "all_features_pfi": [
+    {
+      "feature": "release_year",
+      "importance_mean": 3.451773677098005,
+      "importance_std": 0.5785751213306263,
+      "mu_minus_2sigma": 2.2946234344367524,
+      "passes_criterion": true
+    },
+    {
+      "feature": "rms_variability",
+      "importance_mean": 0.064581007269091,
+      "importance_std": 0.0456128063982024,
+      "mu_minus_2sigma": -0.0266446055273138,
+      "passes_criterion": false
+    },
+    {
+      "feature": "spectral_bandwidth",
+      "importance_mean": 0.0641019601590475,
+      "importance_std": 0.0353078440965672,
+      "mu_minus_2sigma": -0.0065137280340869,
+      "passes_criterion": false
+    },
+    {
+      "feature": "avg_word_length",
+      "importance_mean": 0.0519807402881234,
+      "importance_std": 0.0689645014888362,
+      "mu_minus_2sigma": -0.0859482626895489,
+      "passes_criterion": false
+    },
+    {
+      "feature": "chroma_longest_pattern_duration",
+      "importance_mean": 0.0430848686839379,
+      "importance_std": 0.0251375896576162,
+      "mu_minus_2sigma": -0.0071903106312946,
+      "passes_criterion": false
+    },
+    {
+      "feature": "energy",
+      "importance_mean": 0.0305848802062286,
+      "importance_std": 0.0193377137822464,
+      "mu_minus_2sigma": -0.0080905473582643,
+      "passes_criterion": false
+    },
+    {
+      "feature": "loudness_proxy",
+      "importance_mean": 0.0212927012903225,
+      "importance_std": 0.014634325236272,
+      "mu_minus_2sigma": -0.0079759491822215,
+      "passes_criterion": false
+    },
+    {
+      "feature": "Market_VN",
+      "importance_mean": 0.0138450540907644,
+      "importance_std": 0.0146889895336396,
+      "mu_minus_2sigma": -0.0155329249765147,
+      "passes_criterion": false
+    },
+    {
+      "feature": "punctuation_ratio",
+      "importance_mean": 0.012284645570725,
+      "importance_std": 0.0382565326469658,
+      "mu_minus_2sigma": -0.0642284197232066,
+      "passes_criterion": false
+    },
+    {
+      "feature": "onset_rate",
+      "importance_mean": 0.0051899263757146,
+      "importance_std": 0.1082065870241692,
+      "mu_minus_2sigma": -0.2112232476726237,
+      "passes_criterion": false
+    },
+    {
+      "feature": "mfcc_longest_pattern_duration",
+      "importance_mean": 0.0032318346304148,
+      "importance_std": 0.0241243992828916,
+      "mu_minus_2sigma": -0.0450169639353684,
+      "passes_criterion": false
+    },
+    {
+      "feature": "mode",
+      "importance_mean": 0.0006758725990998,
+      "importance_std": 0.0131217411119854,
+      "mu_minus_2sigma": -0.025567609624871,
+      "passes_criterion": false
+    },
+    {
+      "feature": "Market_KR",
+      "importance_mean": 0.0003532429623259,
+      "importance_std": 0.0082815694429064,
+      "mu_minus_2sigma": -0.0162098959234869,
+      "passes_criterion": false
+    },
+    {
+      "feature": "chroma_repetition_determinism",
+      "importance_mean": -0.0003774056066276,
+      "importance_std": 0.0343184639188166,
+      "mu_minus_2sigma": -0.0690143334442609,
+      "passes_criterion": false
+    },
+    {
+      "feature": "chroma_mean_pattern_duration",
+      "importance_mean": -0.0011098074745468,
+      "importance_std": 0.025346140526724,
+      "mu_minus_2sigma": -0.0518020885279949,
+      "passes_criterion": false
+    },
+    {
+      "feature": "chorus_repetition_count",
+      "importance_mean": -0.0020384017763696,
+      "importance_std": 0.0135861687095947,
+      "mu_minus_2sigma": -0.029210739195559,
+      "passes_criterion": false
+    },
+    {
+      "feature": "repetition_ratio",
+      "importance_mean": -0.0093947363216091,
+      "importance_std": 0.056451300108434,
+      "mu_minus_2sigma": -0.1222973365384772,
+      "passes_criterion": false
+    },
+    {
+      "feature": "spectral_centroid",
+      "importance_mean": -0.0123933853128232,
+      "importance_std": 0.0440056567410791,
+      "mu_minus_2sigma": -0.1004046987949815,
+      "passes_criterion": false
+    },
+    {
+      "feature": "log_word_count",
+      "importance_mean": -0.0133268989642086,
+      "importance_std": 0.020877416447831,
+      "mu_minus_2sigma": -0.0550817318598708,
+      "passes_criterion": false
+    },
+    {
+      "feature": "mfcc_mean_pattern_duration",
+      "importance_mean": -0.0209316657726098,
+      "importance_std": 0.0234076462828011,
+      "mu_minus_2sigma": -0.0677469583382121,
+      "passes_criterion": false
+    },
+    {
+      "feature": "key_confidence",
+      "importance_mean": -0.0230742049552905,
+      "importance_std": 0.0251729490693457,
+      "mu_minus_2sigma": -0.073420103093982,
+      "passes_criterion": false
+    },
+    {
+      "feature": "line_count",
+      "importance_mean": -0.0280232440138231,
+      "importance_std": 0.0387815332530949,
+      "mu_minus_2sigma": -0.105586310520013,
+      "passes_criterion": false
+    },
+    {
+      "feature": "tempo",
+      "importance_mean": -0.0393985840728813,
+      "importance_std": 0.0233407801936388,
+      "mu_minus_2sigma": -0.0860801444601589,
+      "passes_criterion": false
+    },
+    {
+      "feature": "mfcc_repetition_determinism",
+      "importance_mean": -0.0646796855558683,
+      "importance_std": 0.0520505628088523,
+      "mu_minus_2sigma": -0.168780811173573,
+      "passes_criterion": false
+    },
+    {
+      "feature": "tempo_stability",
+      "importance_mean": -0.0705761182326536,
+      "importance_std": 0.0647268205652905,
+      "mu_minus_2sigma": -0.2000297593632348,
+      "passes_criterion": false
+    },
+    {
+      "feature": "chord_change_rate",
+      "importance_mean": -0.0845565504686501,
+      "importance_std": 0.0364856040790132,
+      "mu_minus_2sigma": -0.1575277586266765,
+      "passes_criterion": false
+    }
   ]
 }
