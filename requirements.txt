@@ -1,4 +1,4 @@
-# Python 3.13.7; models/mlr_pipeline.pkl và scaler.pkl được train với bộ này
+# Core Numerical & Statistical Environment (Python 3.13 / 3.14 compatible)
 pandas==3.0.3
 numpy==2.4.2
 scikit-learn==1.9.1
@@ -13,3 +13,8 @@ matplotlib==3.10.8
 librosa==1.0.0
 soundfile==0.14.0
 soxr==1.1.0
+
+# Web Application, Interactive Visualizations & Cloud Database
+streamlit==1.66.1
+plotly==7.1.0
+supabase==2.31.0

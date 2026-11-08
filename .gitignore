@@ -29,3 +29,6 @@ models/*.pkl
 !models/mlr_pipeline.pkl
 # Processed large files
 data/processed/audio_*.csv
+
+# Streamlit secrets
+.streamlit/secrets.toml

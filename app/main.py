@@ -17,6 +17,12 @@ if str(ROOT_DIR) not in sys.path:
 
 from src.utils.supabase_client import get_supabase_credentials
 
+# Modular Tab Imports (Member 4 Scaffolding & Integration)
+from app.components.tab_showcase import render_tab_showcase
+from app.components.tab_simulator import render_tab_simulator
+from app.components.tab_upload import render_tab_upload
+from app.components.tab_diagnostics import render_tab_diagnostics
+
 # Page Configuration
 st.set_page_config(
     page_title="What Makes a Hit Song? | Multimodal Analysis",
@@ -71,7 +77,7 @@ with st.sidebar:
     st.markdown("---")
     st.caption("© 2026 Nhóm Nghiên Cứu ADY201m — All Rights Reserved.")
 
-# Main Navigation Tabs (Checkpoint 3 Scaffolding & Integration Placeholders)
+# Main Navigation Tabs
 tabs = st.tabs([
     "🎵 1. Thư Viện Showcase",
     "🎛️ 2. Giả Lập Hit Song",
@@ -80,17 +86,13 @@ tabs = st.tabs([
 ])
 
 with tabs[0]:
-    st.header("🎵 Thư Viện Bài Hát Tiêu Biểu & Radar Chart Âm Học")
-    st.info("🚧 **Đang ở giai đoạn hoàn thiện Checkpoint 2.** Phân hệ này sẽ được **Member 2** tích hợp và hoàn thiện tại **Checkpoint 3** (Showcase 15 bài mẫu Test Set & Radar Chart đa chiều).")
+    render_tab_showcase()
 
 with tabs[1]:
-    st.header("🎛️ Giả Lập Sáng Tác Hit (What-If Simulator)")
-    st.info("🚧 **Đang ở giai đoạn hoàn thiện Checkpoint 2.** Phân hệ này sẽ được **Member 3** tích hợp và hoàn thiện tại **Checkpoint 3** (Thanh trượt đặc trưng ca từ NLP & âm học Librosa).")
+    render_tab_simulator()
 
 with tabs[2]:
-    st.header("🎙️ Tải Lên Âm Thanh & Trích Xuất Librosa Thời Gian Thực")
-    st.info("🚧 **Đang ở giai đoạn hoàn thiện Checkpoint 2.** Phân hệ này sẽ được **Member 2** tích hợp và hoàn thiện tại **Checkpoint 3** (Tải lên file MP3/WAV, trích xuất 17 đặc trưng Librosa với caching @st.cache_data và rào chắn an toàn).")
+    render_tab_upload()
 
 with tabs[3]:
-    st.header("📊 Model Diagnostics & Comparative Benchmark")
-    st.info("🚧 **Đang ở giai đoạn hoàn thiện Checkpoint 2.** Phân hệ này sẽ được **Member 1 & Member 4** tích hợp và hoàn thiện tại **Checkpoint 3** (Bảng đối chuẩn OLS Model 3 vs Random Forest Model 4).")
+    render_tab_diagnostics()
