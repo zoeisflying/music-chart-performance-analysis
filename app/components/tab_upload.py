@@ -67,6 +67,9 @@ except ImportError:
         def selectbox(self, label, options, *args, **kwargs):
             return options[0] if options else None
 
+        def text_area(self, label, *args, **kwargs):
+            return ""
+
         def __getattr__(self, name: str):
             return lambda *args, **kwargs: None
 
@@ -229,11 +232,12 @@ def _build_prediction_payload(
     market: str,
     lyrics_medians: Dict[str, float],
     train_medians: Dict[str, float],
+    user_lyrics_features: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
     """
     Ghép vector đặc trưng chuẩn bị cho DualModelPredictor:
     - 17 đặc trưng âm học thô từ audio_extractor
-    - 6 biến ca từ fallback từ trung vị thị trường (TV3)
+    - 6 biến ca từ: ưu tiên trích xuất từ ca từ người dùng nhập; chỉ biến nào thiếu mới dùng trung vị thị trường
     - release_year mặc định 2024
     - market theo lựa chọn người dùng (VN/US/KR)
     """
@@ -242,12 +246,33 @@ def _build_prediction_payload(
         "line_count", "chorus_repetition_count", "punctuation_ratio",
     ]
     payload = dict(features)
-    for col in lyrics_cols:
-        val = lyrics_medians.get(col) if lyrics_medians else None
-        if val is None:
-            val = train_medians.get(col, 0.0)
-        payload[col] = float(val)
+    lyrics_provenance: Dict[str, Dict[str, Any]] = {}
 
+    for col in lyrics_cols:
+        val = None
+        source = "Trung vị thị trường"
+        if user_lyrics_features and user_lyrics_features.get(col) is not None:
+            try:
+                candidate = float(user_lyrics_features[col])
+                if np.isfinite(candidate):
+                    val = candidate
+                    source = "Trích xuất từ ca từ"
+            except (ValueError, TypeError):
+                val = None
+
+        if val is None:
+            val = lyrics_medians.get(col) if lyrics_medians else None
+            if val is None:
+                val = train_medians.get(col, 0.0)
+            source = "Trung vị thị trường (Fallback)"
+
+        payload[col] = float(val)
+        lyrics_provenance[col] = {
+            "value": float(val),
+            "source": source,
+        }
+
+    payload["_lyrics_provenance"] = lyrics_provenance
     payload["market"] = str(market).upper()
     payload["release_year"] = 2024.0
     return payload
@@ -457,6 +482,15 @@ def render() -> None:
         )
         market_code = MARKET_CODES.get(market_label, "VN")
 
+        st.subheader("📝 Ca Từ / Lyrics (Tùy chọn)")
+        user_lyrics_text = st.text_area(
+            label="Dán lời bài hát nếu có:",
+            placeholder="Dán toàn bộ ca từ bài hát tại đây... Hệ thống sẽ trích xuất trực tiếp 6 đặc trưng ca từ (độ dài từ, tỷ lệ lặp, số dòng, điệp khúc, dấu câu). Nếu để trống, hệ thống sẽ tự động dùng trung vị thị trường.",
+            height=140,
+            key="tab3_lyrics_input",
+            help="Hệ thống ưu tiên sử dụng đặc trưng trích xuất từ ca từ thật. Chỉ những đặc trưng không trích xuất được mới dùng trung vị thị trường.",
+        )
+
         with st.expander("ℹ️ Tiêu chuẩn Kỹ thuật Phân hệ", expanded=False):
             st.markdown(
                 f"""
@@ -554,13 +588,48 @@ def render() -> None:
         st.markdown("---")
 
         st.subheader(f"🎯 Dự Đoán Thành Tích Tại Thị Trường {market_label}")
-        st.info(
-            f"ℹ️ **Cơ chế Fallback Ca từ:** Tệp âm thanh tải lên chưa có lời. "
-            f"Hệ thống sẽ nạp trung vị 6 đặc trưng ca từ của **{market_label}** từ `lyrics_market_medians.json` "
-            "để tạo vector đầu vào hoàn chỉnh cho mô hình."
-        )
 
-        # Đồng bộ hóa bộ nhớ đệm dự đoán theo tệp và thị trường
+        user_lyrics_features = None
+        has_user_lyrics = bool(user_lyrics_text and user_lyrics_text.strip())
+
+        if has_user_lyrics:
+            try:
+                from src.features.lyrics_processor import process_lyrics_text
+                extracted_lyrics = process_lyrics_text(file_sha, user_lyrics_text.strip())
+                if extracted_lyrics.get("extraction_status") == "success":
+                    user_lyrics_features = extracted_lyrics
+                    with st.expander("📝 Phân Tích & Trích Xuất Đặc Trưng Ca Từ (Lyrics NLP)", expanded=True):
+                        st.success("✅ Đã trích xuất thành công đặc trưng từ lời ca khúc do bạn cung cấp!")
+                        wc = user_lyrics_features.get("word_count")
+                        lc = user_lyrics_features.get("line_count")
+                        rep = user_lyrics_features.get("repetition_ratio")
+                        awl = user_lyrics_features.get("avg_word_length")
+                        ch = user_lyrics_features.get("chorus_repetition_count")
+                        pq = user_lyrics_features.get("punctuation_ratio")
+
+                        lc1, lc2, lc3 = st.columns(3)
+                        lc1.metric("Số từ (Word Count)", f"{int(wc)}" if wc is not None else "N/A")
+                        lc2.metric("Số dòng (Line Count)", f"{int(lc)}" if lc is not None else "N/A")
+                        lc3.metric("Tỷ lệ lặp (Repetition)", f"{rep:.3f}" if rep is not None else "N/A")
+
+                        ch_desc = f"{int(ch)}" if ch is not None else "Không xác định (Dùng trung vị)"
+                        st.caption(
+                            f"Độ dài từ TB: **{awl:.2f} ký tự** | "
+                            f"Lần lặp điệp khúc: **{ch_desc}** | "
+                            f"Tỷ lệ dấu câu: **{pq:.4f}**"
+                        )
+                else:
+                    st.warning(f"⚠️ Trích xuất ca từ không thành công ({extracted_lyrics.get('error_reason', 'Không nhận diện được từ')}). Hệ thống tự động sử dụng trung vị thị trường.")
+            except Exception as e:
+                st.warning(f"⚠️ Không thể trích xuất đặc trưng ca từ: {e}. Hệ thống tự động sử dụng trung vị thị trường.")
+        else:
+            st.info(
+                f"ℹ️ **Cơ chế Fallback Ca từ:** Tệp âm thanh chưa kèm lời ca. "
+                f"Hệ thống tự động nạp trung vị 6 đặc trưng ca từ của **{market_label}** từ `lyrics_market_medians.json` "
+                "để tạo vector đầu vào hoàn chỉnh cho mô hình."
+            )
+
+        # Đồng bộ hóa bộ nhớ đệm dự đoán theo tệp, thị trường và ca từ
         if "tab3_predictions" not in st.session_state:
             st.session_state["tab3_predictions"] = {}
 
@@ -569,7 +638,8 @@ def render() -> None:
             st.session_state["tab3_current_file_sha"] = file_sha
             st.session_state["tab3_predictions"] = {}
 
-        pred_key = f"{file_sha}_{market_code}"
+        lyrics_hash = hashlib.sha256(user_lyrics_text.strip().encode("utf-8")).hexdigest()[:8] if has_user_lyrics else "nomedia"
+        pred_key = f"{file_sha}_{market_code}_{lyrics_hash}"
 
         predict_btn = st.button(
             f"🔮 Chạy Mô Hình Dự Đoán Song Hành ({market_label})",
@@ -588,7 +658,13 @@ def render() -> None:
                     "Hệ thống tự động sử dụng trung vị chung toàn tập huấn luyện."
                 )
 
-            payload = _build_prediction_payload(features, market_code, market_medians, train_medians)
+            payload = _build_prediction_payload(
+                features,
+                market_code,
+                market_medians,
+                train_medians,
+                user_lyrics_features=user_lyrics_features,
+            )
 
             with st.spinner("⚙️ Đang tính toán qua OLS Model 3 & Random Forest Model 4..."):
                 pred_res, pred_err = _predict_dual_models(payload)

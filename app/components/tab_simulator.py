@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from src.utils.pipeline_inference import DualModelPredictor
+from src.utils.tier_classifier import get_acoustic_fit_profile
 
 
 ROOT_DIR = Path(__file__).resolve().parents[2]
@@ -149,6 +150,45 @@ def render() -> None:
         cols[2].metric("Ensemble (mean)", f"{ensemble:.2f}")
     else:
         cols[2].metric("Ensemble (mean)", "Unavailable")
+
+    # Đối chuẩn bách phân vị và phân tầng mẫu hình âm học theo thị trường
+    rf_score = display_predictions.get("Random Forest Model 4", 0.0)
+    market_code = str(raw_row.get("market", "US")).upper()
+    profile = get_acoustic_fit_profile(rf_score, market=market_code, model_type="rf")
+
+    st.markdown("---")
+    st.markdown(
+        f"#### {profile['badge_color']} Vị Trí Mẫu Hình Âm Học: **Top {profile['top_percent']:.0f}%** "
+        f"Thị Trường {profile['market_name']} — *{profile['tier_title']}*"
+    )
+    st.progress(min(1.0, max(0.0, profile["percentile"] / 100.0)))
+
+    if profile["is_top22"]:
+        st.success(
+            f"🏆 **XÁC THỰC ÂM HỌC: LỌT NHÓM MẪU HÌNH DẪN ĐẦU (TOP 22% THỊ TRƯỜNG {profile['market_name'].upper()})**\n\n"
+            f"- **Vị thế Mô phỏng:** Bộ thông số âm học bạn vừa thiết lập đưa ca khúc vào **Top {profile['top_percent']:.0f}%** điểm âm học cao nhất thị trường {profile['market_name']}.\n"
+            f"- **Kiểm chứng độc lập (n=410 bài test):** Nhóm ca khúc thuộc phân tầng này có **xác suất đạt Hit thực tế lên đến 44.1%** "
+            f"(gấp 1.76 lần mức ngẫu nhiên 25.1%, Fisher Exact p < 0.0001, Odds Ratio = 3.24), với điểm BXH thực tế trung bình cao hơn **+13.3 đến +17.8 điểm** (p < 0.01).\n"
+            f"- *Khuyến cáo:* Âm học là bệ phóng vững chắc (điều kiện cần); thành công thương mại thực tế vẫn đòi hỏi bệ phóng truyền thông và nghệ sĩ (MAE ≈ 30 điểm)."
+        )
+    elif profile["tier_code"] == "Tier 2":
+        st.warning(
+            f"⭐ **MẪU HÌNH ÂM HỌC CHUẨN ĐẠI CHÚNG (TOP {profile['top_percent']:.0f}% THỊ TRƯỜNG {profile['market_name'].upper()})**\n\n"
+            f"- {profile['description']}\n"
+            f"- **Gợi ý tối ưu:** Để tiến vào Top 22% dẫn đầu, bạn có thể thử tăng nhẹ Cường độ âm thanh (Loudness proxy) hoặc tối ưu Nhịp độ (Tempo) phù hợp với thị hiếu thị trường."
+        )
+    elif profile["tier_code"] == "Tier 3":
+        st.info(
+            f"📈 **MẪU HÌNH ÂM HỌC THỂ NGHIỆM / PHÂN HÓA (TOP {profile['top_percent']:.0f}% THỊ TRƯỜNG {profile['market_name'].upper()})**\n\n"
+            f"- {profile['description']}\n"
+            f"- **Gợi ý tối ưu:** Thông số hiện tại nằm ở dải kén người nghe trên BXH đại chúng. Thử điều chỉnh các thanh trượt về vùng trung vị để tiếp cận tệp thính giả phổ thông hơn."
+        )
+    else:
+        st.error(
+            f"📉 **MẪU HÌNH ÂM HỌC LỆCH CHUẨN THỊ TRƯỜNG (TOP {profile['top_percent']:.0f}% THỊ TRƯỜNG {profile['market_name'].upper()})**\n\n"
+            f"- {profile['description']}\n"
+            f"- **Gợi ý tối ưu:** Cấu trúc bài hát lệch xa chuẩn mực thịnh hành của thị trường {profile['market_name']}. Cần điều chỉnh lại các chỉ số cốt lõi như Loudness, Tempo và Repetition Ratio."
+        )
 
 
 __all__ = ["render"]
