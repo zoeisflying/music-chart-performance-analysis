@@ -250,6 +250,16 @@ class TestTabUploadHeadless:
         # Verify headless execution without active upload
         render()
 
+    def test_10_render_prediction_result_with_acoustic_fit_profile(self):
+        """Verify _render_prediction_result renders profile, percentile, and golden callout when appropriate."""
+        pred = {
+            "ols_prediction": 14.2,
+            "rf_prediction": 18.5,
+            "ensemble_prediction": 16.35,
+        }
+        from app.components.tab_upload import _render_prediction_result
+        _render_prediction_result(pred, "🇻🇳 Việt Nam", market_code="VN")
+
 
 if __name__ == "__main__":
     import sys

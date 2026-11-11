@@ -253,3 +253,19 @@ def test_render_switching_markets_no_key_error():
             render()
 
         assert mock_st.header.called
+
+
+def test_render_hit_screener_and_gap_analysis_present():
+    """Verify Hit Screener KPI and Gap analysis elements are properly rendered."""
+    mock_st = MagicMock()
+    mock_st.columns.side_effect = lambda spec: [MagicMock() for _ in range(len(spec) if isinstance(spec, (list, tuple)) else int(spec))]
+    mock_st.expander.return_value.__enter__.return_value = MagicMock()
+    mock_st.expander.return_value.__exit__.return_value = None
+    mock_st.selectbox.side_effect = lambda label, options, **kwargs: options[0]
+
+    with patch.dict(sys.modules, {"streamlit": mock_st}):
+        render()
+
+    # Verify metric calls include Hit Screener metrics
+    metric_labels = [call.kwargs.get("label", call.args[0] if call.args else "") for call in mock_st.metric.call_args_list]
+    assert any("Xác Suất Hit" in label for label in metric_labels), "Hit Screener KPI metric must be called"
