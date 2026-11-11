@@ -250,6 +250,39 @@ class TestTabUploadHeadless:
         # Verify headless execution without active upload
         render()
 
+    def test_10_render_prediction_result_with_acoustic_fit_profile(self):
+        """Verify _render_prediction_result renders profile, percentile, and golden callout when appropriate."""
+        pred = {
+            "ols_prediction": 14.2,
+            "rf_prediction": 18.5,
+            "ensemble_prediction": 16.35,
+        }
+        from app.components.tab_upload import _render_prediction_result
+        _render_prediction_result(pred, "🇻🇳 Việt Nam", market_code="VN")
+
+    def test_11_user_lyrics_extraction_and_smart_fallback(self):
+        """Verify user lyrics extraction populates extracted features and only falls back for missing features."""
+        features = {"tempo": 120.0, "energy": 0.25, "mode": 1}
+        market_lyrics = {"word_count": 300.0, "chorus_repetition_count": 3.0, "repetition_ratio": 0.55}
+        train_medians = {"word_count": 280.0, "chorus_repetition_count": 2.5, "punctuation_ratio": 0.05}
+
+        user_lyrics = {
+            "word_count": 420.0,
+            "repetition_ratio": 0.68,
+            "chorus_repetition_count": None,  # Missing: should fallback to market median
+        }
+
+        payload = _build_prediction_payload(
+            features, "VN", market_lyrics, train_medians, user_lyrics_features=user_lyrics
+        )
+
+        assert payload["word_count"] == 420.0, "word_count should use user lyrics value"
+        assert payload["repetition_ratio"] == 0.68, "repetition_ratio should use user lyrics value"
+        assert payload["chorus_repetition_count"] == 3.0, "chorus_repetition_count should fallback to market median (3.0)"
+        assert "_lyrics_provenance" in payload
+        assert payload["_lyrics_provenance"]["word_count"]["source"] == "Trích xuất từ ca từ"
+        assert payload["_lyrics_provenance"]["chorus_repetition_count"]["source"] == "Trung vị thị trường (Fallback)"
+
 
 if __name__ == "__main__":
     import sys

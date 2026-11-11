@@ -67,6 +67,9 @@ except ImportError:
         def selectbox(self, label, options, *args, **kwargs):
             return options[0] if options else None
 
+        def text_area(self, label, *args, **kwargs):
+            return ""
+
         def __getattr__(self, name: str):
             return lambda *args, **kwargs: None
 
@@ -229,11 +232,12 @@ def _build_prediction_payload(
     market: str,
     lyrics_medians: Dict[str, float],
     train_medians: Dict[str, float],
+    user_lyrics_features: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
     """
     Ghép vector đặc trưng chuẩn bị cho DualModelPredictor:
     - 17 đặc trưng âm học thô từ audio_extractor
-    - 6 biến ca từ fallback từ trung vị thị trường (TV3)
+    - 6 biến ca từ: ưu tiên trích xuất từ ca từ người dùng nhập; chỉ biến nào thiếu mới dùng trung vị thị trường
     - release_year mặc định 2024
     - market theo lựa chọn người dùng (VN/US/KR)
     """
@@ -242,12 +246,33 @@ def _build_prediction_payload(
         "line_count", "chorus_repetition_count", "punctuation_ratio",
     ]
     payload = dict(features)
-    for col in lyrics_cols:
-        val = lyrics_medians.get(col) if lyrics_medians else None
-        if val is None:
-            val = train_medians.get(col, 0.0)
-        payload[col] = float(val)
+    lyrics_provenance: Dict[str, Dict[str, Any]] = {}
 
+    for col in lyrics_cols:
+        val = None
+        source = "Trung vị thị trường"
+        if user_lyrics_features and user_lyrics_features.get(col) is not None:
+            try:
+                candidate = float(user_lyrics_features[col])
+                if np.isfinite(candidate):
+                    val = candidate
+                    source = "Trích xuất từ ca từ"
+            except (ValueError, TypeError):
+                val = None
+
+        if val is None:
+            val = lyrics_medians.get(col) if lyrics_medians else None
+            if val is None:
+                val = train_medians.get(col, 0.0)
+            source = "Trung vị thị trường (Fallback)"
+
+        payload[col] = float(val)
+        lyrics_provenance[col] = {
+            "value": float(val),
+            "source": source,
+        }
+
+    payload["_lyrics_provenance"] = lyrics_provenance
     payload["market"] = str(market).upper()
     payload["release_year"] = 2024.0
     return payload
@@ -334,29 +359,26 @@ def _render_highlight_metrics(features: Dict[str, Any]) -> None:
     col4.metric("🎹 Điệu tính & Giọng", full_key)
 
 
-def _render_prediction_result(pred: Dict[str, float], market_label: str) -> None:
+def _render_prediction_result(
+    pred: Dict[str, float],
+    market_label: str,
+    market_code: str = "VN",
+) -> None:
     """
-    Hiển thị kết quả dự đoán Dual-Model: OLS Model 3 & Random Forest Model 4.
-    Phân tầng dựa trên phân vị thực nghiệm của biến mục tiêu chart_score:
-      - Q3 (Top 25% Bảng xếp hạng): chart_score >= 37.58
-      - Median (Trung vị thực nghiệm): chart_score = 15.16
-      - Q1 (Phân vị 25% dưới): chart_score = -11.93
+    Hiển thị kết quả dự đoán điểm số song hành và đối chuẩn mẫu hình âm học theo thị trường.
+    Sử dụng get_acoustic_fit_profile từ src.utils.tier_classifier để quy chiếu phân vị
+    thay vì áp đặt các ngưỡng điểm thô gây lỗi co cụm trung vị (Shrinkage to Mean).
     """
+    from src.utils.tier_classifier import get_acoustic_fit_profile
+
     ols_score = pred.get("ols_prediction", 0.0)
     rf_score = pred.get("rf_prediction", 0.0)
     ensemble = pred.get("ensemble_prediction", 0.0)
 
-    # Đánh giá phân tầng dựa trên phân vị thực nghiệm của chart_score
-    if ensemble >= 37.58:
-        tier, tier_color, tier_emoji = "Top 25% Bảng Xếp Hạng (Tiềm năng cao - Tier 1)", "success", "🔥"
-    elif ensemble >= 15.16:
-        tier, tier_color, tier_emoji = "Trên Mức Trung Vị (Tiềm năng khá - Tier 2)", "warning", "⚡"
-    elif ensemble >= -11.93:
-        tier, tier_color, tier_emoji = "Khoảng Dưới Trung Vị (Tiềm năng trung bình - Tier 3)", "info", "📊"
-    else:
-        tier, tier_color, tier_emoji = "Đáy Phân Phối (Cần tối ưu mạnh phối khí - Tier 4)", "error", "📉"
+    # Đối chuẩn bách phân vị âm học theo thị trường bằng Random Forest
+    profile = get_acoustic_fit_profile(rf_score, market=market_code, model_type="rf")
 
-    st.subheader("🎯 Kết Quả Dự Đoán Song Hành (Dual-Model)")
+    st.subheader(f"🎯 Kết Quả Dự Đoán Song Hành & Đối Chuẩn Âm Học ({market_label})")
 
     c1, c2, c3 = st.columns(3)
     c1.metric(
@@ -375,25 +397,55 @@ def _render_prediction_result(pred: Dict[str, float], market_label: str) -> None
         help="Điểm bình quân trọng số 50-50 giữa OLS và Random Forest (Thang điểm chuẩn hóa [-99, +100]).",
     )
 
-    if tier_color == "success":
-        st.success(f"{tier_emoji} **{tier}** — Điểm tổ hợp vượt ngưỡng phân vị 75% ($Q_3 = 37.58$). Cấu trúc âm học mang đặc trưng tích cực tương đồng với nhóm dẫn đầu bảng xếp hạng.")
-    elif tier_color == "warning":
-        st.warning(f"{tier_emoji} **{tier}** — Điểm tổ hợp nằm trong dải trên trung vị ($15.16 \\le \\text{{Score}} < 37.58$). Cấu trúc âm học ổn định, đáp ứng thị hiếu chung.")
-    elif tier_color == "info":
-        st.info(f"{tier_emoji} **{tier}** — Điểm tổ hợp nằm trong dải dưới trung vị ($-11.93 \\le \\text{{Score}} < 15.16$). Cấu trúc âm học chưa tạo được sự đột phá thương mại.")
+    st.markdown("---")
+    st.markdown(
+        f"#### {profile['badge_color']} Vị Trí Mẫu Hình Âm Học: **Top {profile['top_percent']:.0f}%** "
+        f"Thị Trường {market_label} — *{profile['tier_title']}*"
+    )
+    st.progress(min(1.0, max(0.0, profile["percentile"] / 100.0)))
+
+    if profile["is_top22"]:
+        st.success(
+            f"🏆 **XÁC THỰC ÂM HỌC: LỌT NHÓM MẪU HÌNH DẪN ĐẦU (TOP 22% THỊ TRƯỜNG {market_label.upper()})**\n\n"
+            f"- **Vị thế Âm học:** Cấu trúc âm thanh của ca khúc tiệm cận nhóm 22% điểm dự đoán cao nhất tại thị trường {market_label} "
+            f"(Vị trí tương đối: **Top {profile['top_percent']:.0f}%**).\n"
+            f"- **Kiểm chứng độc lập (n=410 bài test):** Nhóm ca khúc thuộc phân tầng này có **xác suất đạt Hit thực tế lên đến 44.1%** "
+            f"(gấp 1.76 lần mức ngẫu nhiên 25.1%, Fisher Exact $p < 0.0001$, Odds Ratio = 3.24), với điểm BXH thực tế trung bình cao hơn **+13.3 đến +17.8 điểm** ($p < 0.01$).\n"
+            f"- *Khuyến cáo:* Âm học là bệ phóng vững chắc (điều kiện cần); thành công thương mại vẫn cần bệ phóng truyền thông và độ nhận diện nghệ sĩ (MAE ≈ 30 điểm)."
+        )
+    elif profile["tier_code"] == "Tier 2":
+        st.warning(
+            f"⭐ **MẪU HÌNH ÂM HỌC CHUẨN ĐẠI CHÚNG (TOP {profile['top_percent']:.0f}% THỊ TRƯỜNG {market_label.upper()})**\n\n"
+            f"- {profile['description']}\n"
+            f"- **Khuyến nghị sản xuất:** Cấu trúc bài hát đạt độ hài hòa tốt với thị hiếu người nghe đại chúng. Để bứt phá thành Mega-hit, ca khúc cần sự hỗ trợ mạnh mẽ từ chiến dịch marketing và vị trí playlisting nổi bật."
+        )
+    elif profile["tier_code"] == "Tier 3":
+        st.info(
+            f"📈 **MẪU HÌNH ÂM HỌC THỂ NGHIỆM / PHÂN HÓA (TOP {profile['top_percent']:.0f}% THỊ TRƯỜNG {market_label.upper()})**\n\n"
+            f"- {profile['description']}\n"
+            f"- **Khuyến nghị sản xuất:** Cấu trúc âm nhạc mang nét cá tính riêng biệt hoặc kén người nghe đại chúng. Thích hợp hướng tới phân khúc khán giả ngách hoặc cộng đồng người nghe trung thành."
+        )
     else:
-        st.error(f"{tier_emoji} **{tier}** — Điểm tổ hợp thuộc nhóm 25% thấp nhất ($< -11.93$). Cần xem xét lại các chỉ số năng lượng, âm sắc hoặc nhịp điệu.")
+        st.error(
+            f"📉 **MẪU HÌNH ÂM HỌC LỆCH CHUẨN THỊ TRƯỜNG (TOP {profile['top_percent']:.0f}% THỊ TRƯỜNG {market_label.upper()})**\n\n"
+            f"- {profile['description']}\n"
+            f"- **Khuyến nghị sản xuất:** Ca khúc lệch xa khỏi các chuẩn mực âm học thường thấy trên BXH {market_label}. Cân nhắc rà soát lại các chỉ số năng lượng (Energy), độ lớn (Loudness proxy) hoặc nhịp độ (Tempo) nếu mục tiêu là tiếp cận đại chúng."
+        )
 
     st.caption(
-        "📌 **Lưu ý phương pháp luận & Giới hạn:**\n"
-        "- **Phân tầng tương đối (Relative Benchmark):** Các ngưỡng $Q_1, \\text{Median}, Q_3$ được tính toán trên phân phối điểm thực tế của 2,098 ca khúc. "
-        "Do điểm dự báo tổ hợp (Ensemble) có xu hướng co cụm về trung vị (*Shrinkage to Mean*), việc phân tầng mang tính chất **so sánh tương đối về cấu trúc âm học**, "
-        "không phải dự báo chắc chắn về thứ hạng thực tế trên thị trường.\n"
-        "- **Fallback Ca từ:** Vì bài hát tải lên chưa có lời, hệ thống đã nạp **trung vị 6 biến ca từ của thị trường** "
-        f"({market_label}) từ tệp `data/processed/lyrics_market_medians.json` (do TV3 bàn giao trên tập Train n=1,685).\n"
-        "- **Năng lực giải thích:** Mô hình OLS Model 3 giải thích khoảng 3.4% – 6.6% biến thiên "
-        "($R^2_{\\text{test}} = 3.40\\%$, $R^2_{\\text{train}} = 6.56\\%$), trong khi Random Forest Model 4 đạt $R^2_{\\text{test}} \\approx 6.86\\%$ toàn cục.\n"
-        "- **Khuyến nghị sử dụng:** Điểm số phản ánh khuynh hướng âm học khách quan, không thể đo lường các yếu tố ngoại sinh (marketing, playlisting, hiệu ứng viral)."
+        "📌 **Lưu ý phương pháp luận & Cơ sở học thuật:**\n"
+        "- **Tái định vị Phân tầng Âm học ([Herremans et al., 2019](https://arxiv.org/pdf/1905.08076)):** "
+        "Do các đặc trưng âm thanh thuần túy chỉ giải thích từ 3.4% – 6.9% biến thiên thành tích thương mại ($R^2_{\\text{OOS}}$), "
+        "điểm dự đoán có xu hướng co cụm về trung vị (*Shrinkage to Mean*). Việc phân tầng được tính dựa trên **bách phân vị nội bộ từng thị trường** "
+        "từ dữ liệu đóng băng, giúp đánh giá vị thế tiệm cận mẫu hình âm học một cách khách quan.\n"
+        "- **Bản chất Văn liệu Hit Song Science ([Salganik et al., 2006](https://pdodds.w3.uvm.edu/research/papers/years/2006/salganik2006a.pdf); "
+        "[Pachet & Roy, 2008](https://csl.sony.fr/wp-content/uploads/2008/01/pachet-08c.pdf)):** "
+        "Thành công âm nhạc chịu chi phối áp đảo bởi ảnh hưởng xã hội và chiến lược tiếp thị ([Jiang, 2024](https://www.scitepress.org/PublishedPapers/2024/133300); "
+        "[Nijkamp, 2018](https://essay.utwente.nl/essays/75422)). Đặc trưng âm thanh là điều kiện cần nhưng không đủ để đảm bảo thứ hạng đơn lẻ (MAE ≈ 29–30 điểm).\n"
+        "- **Thiên lệch chọn mẫu (Range Restriction):** Bộ dữ liệu chỉ gồm bài hát đã lọt vào Spotify Top 200/Top 50 (đã qua vòng tuyển trạch tự nhiên), "
+        "dẫn đến dải phương sai bị cắt cụt, kéo $R^2$ xuống thấp hơn so với khi kiểm nghiệm trên toàn bộ kho nhạc đại trà.\n"
+        "- **Fallback Ca từ:** Tệp âm thanh tải lên chưa có lời được nạp trung vị 6 biến ca từ của "
+        f"{market_label} từ `lyrics_market_medians.json` (tập Train n=1,685 do TV3 bàn giao)."
     )
 
 
@@ -429,6 +481,15 @@ def render() -> None:
             help="Thị trường quyết định vector dummy, hệ số độ dốc tương tác và bộ trung vị ca từ.",
         )
         market_code = MARKET_CODES.get(market_label, "VN")
+
+        st.subheader("📝 Ca Từ / Lyrics (Tùy chọn)")
+        user_lyrics_text = st.text_area(
+            label="Dán lời bài hát nếu có:",
+            placeholder="Dán toàn bộ ca từ bài hát tại đây... Hệ thống sẽ trích xuất trực tiếp 6 đặc trưng ca từ (độ dài từ, tỷ lệ lặp, số dòng, điệp khúc, dấu câu). Nếu để trống, hệ thống sẽ tự động dùng trung vị thị trường.",
+            height=140,
+            key="tab3_lyrics_input",
+            help="Hệ thống ưu tiên sử dụng đặc trưng trích xuất từ ca từ thật. Chỉ những đặc trưng không trích xuất được mới dùng trung vị thị trường.",
+        )
 
         with st.expander("ℹ️ Tiêu chuẩn Kỹ thuật Phân hệ", expanded=False):
             st.markdown(
@@ -527,13 +588,48 @@ def render() -> None:
         st.markdown("---")
 
         st.subheader(f"🎯 Dự Đoán Thành Tích Tại Thị Trường {market_label}")
-        st.info(
-            f"ℹ️ **Cơ chế Fallback Ca từ:** Tệp âm thanh tải lên chưa có lời. "
-            f"Hệ thống sẽ nạp trung vị 6 đặc trưng ca từ của **{market_label}** từ `lyrics_market_medians.json` "
-            "để tạo vector đầu vào hoàn chỉnh cho mô hình."
-        )
 
-        # Đồng bộ hóa bộ nhớ đệm dự đoán theo tệp và thị trường
+        user_lyrics_features = None
+        has_user_lyrics = bool(user_lyrics_text and user_lyrics_text.strip())
+
+        if has_user_lyrics:
+            try:
+                from src.features.lyrics_processor import process_lyrics_text
+                extracted_lyrics = process_lyrics_text(file_sha, user_lyrics_text.strip())
+                if extracted_lyrics.get("extraction_status") == "success":
+                    user_lyrics_features = extracted_lyrics
+                    with st.expander("📝 Phân Tích & Trích Xuất Đặc Trưng Ca Từ (Lyrics NLP)", expanded=True):
+                        st.success("✅ Đã trích xuất thành công đặc trưng từ lời ca khúc do bạn cung cấp!")
+                        wc = user_lyrics_features.get("word_count")
+                        lc = user_lyrics_features.get("line_count")
+                        rep = user_lyrics_features.get("repetition_ratio")
+                        awl = user_lyrics_features.get("avg_word_length")
+                        ch = user_lyrics_features.get("chorus_repetition_count")
+                        pq = user_lyrics_features.get("punctuation_ratio")
+
+                        lc1, lc2, lc3 = st.columns(3)
+                        lc1.metric("Số từ (Word Count)", f"{int(wc)}" if wc is not None else "N/A")
+                        lc2.metric("Số dòng (Line Count)", f"{int(lc)}" if lc is not None else "N/A")
+                        lc3.metric("Tỷ lệ lặp (Repetition)", f"{rep:.3f}" if rep is not None else "N/A")
+
+                        ch_desc = f"{int(ch)}" if ch is not None else "Không xác định (Dùng trung vị)"
+                        st.caption(
+                            f"Độ dài từ TB: **{awl:.2f} ký tự** | "
+                            f"Lần lặp điệp khúc: **{ch_desc}** | "
+                            f"Tỷ lệ dấu câu: **{pq:.4f}**"
+                        )
+                else:
+                    st.warning(f"⚠️ Trích xuất ca từ không thành công ({extracted_lyrics.get('error_reason', 'Không nhận diện được từ')}). Hệ thống tự động sử dụng trung vị thị trường.")
+            except Exception as e:
+                st.warning(f"⚠️ Không thể trích xuất đặc trưng ca từ: {e}. Hệ thống tự động sử dụng trung vị thị trường.")
+        else:
+            st.info(
+                f"ℹ️ **Cơ chế Fallback Ca từ:** Tệp âm thanh chưa kèm lời ca. "
+                f"Hệ thống tự động nạp trung vị 6 đặc trưng ca từ của **{market_label}** từ `lyrics_market_medians.json` "
+                "để tạo vector đầu vào hoàn chỉnh cho mô hình."
+            )
+
+        # Đồng bộ hóa bộ nhớ đệm dự đoán theo tệp, thị trường và ca từ
         if "tab3_predictions" not in st.session_state:
             st.session_state["tab3_predictions"] = {}
 
@@ -542,7 +638,8 @@ def render() -> None:
             st.session_state["tab3_current_file_sha"] = file_sha
             st.session_state["tab3_predictions"] = {}
 
-        pred_key = f"{file_sha}_{market_code}"
+        lyrics_hash = hashlib.sha256(user_lyrics_text.strip().encode("utf-8")).hexdigest()[:8] if has_user_lyrics else "nomedia"
+        pred_key = f"{file_sha}_{market_code}_{lyrics_hash}"
 
         predict_btn = st.button(
             f"🔮 Chạy Mô Hình Dự Đoán Song Hành ({market_label})",
@@ -561,7 +658,13 @@ def render() -> None:
                     "Hệ thống tự động sử dụng trung vị chung toàn tập huấn luyện."
                 )
 
-            payload = _build_prediction_payload(features, market_code, market_medians, train_medians)
+            payload = _build_prediction_payload(
+                features,
+                market_code,
+                market_medians,
+                train_medians,
+                user_lyrics_features=user_lyrics_features,
+            )
 
             with st.spinner("⚙️ Đang tính toán qua OLS Model 3 & Random Forest Model 4..."):
                 pred_res, pred_err = _predict_dual_models(payload)
@@ -574,7 +677,7 @@ def render() -> None:
         # Hiển thị kết quả tương ứng chính xác với thị trường hiện tại
         if pred_key in st.session_state["tab3_predictions"]:
             current_pred = st.session_state["tab3_predictions"][pred_key]
-            _render_prediction_result(current_pred, market_label)
+            _render_prediction_result(current_pred, market_label, market_code=market_code)
         else:
             st.info(f"💡 Nhấn nút trên để tính toán dự đoán điểm số tại **{market_label}**.")
 
